@@ -1,6 +1,7 @@
 package com.candidate.pks.candidate.service;
 
 import com.candidate.pks.candidate.dto.AddCandidateRequest;
+import com.candidate.pks.candidate.dto.InitialCommitRequest;
 import com.candidate.pks.candidate.model.Candidate;
 import com.candidate.pks.candidate.model.Status;
 import com.candidate.pks.candidate.repository.CandidateRepository;
@@ -45,5 +46,9 @@ public class CandidateService {
         candidateRepository.save(candidate);
 
         return new Response("Candidate added successfully.");
+    }
+
+    public Response initialCommit(InitialCommitRequest initialCommitRequest) {
+        return null;
     }
 }

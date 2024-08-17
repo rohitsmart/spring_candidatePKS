@@ -5,6 +5,7 @@ import com.candidate.pks.auth.model.Employee;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Getter
@@ -17,6 +18,16 @@ public class Candidate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column(unique = true,nullable = false)
+    private String candidateId;
+
+    @PrePersist
+    private void generateCandidateId() {
+        if (this.candidateId == null) {
+            this.candidateId = "CD" + String.format("%04d", this.id);
+        }
+    }
 
     @Column(nullable = false)
     private String firstName;
@@ -68,13 +79,11 @@ public class Candidate {
     private String overAll;
     /** End things to be filled by HR **/
 
-
-
     @Temporal(TemporalType.TIMESTAMP)
     private Date applicationDate;
 
-    @OneToOne(mappedBy = "candidate", cascade = CascadeType.ALL)
-    private Interview interviews;
+    @OneToMany(mappedBy = "candidate", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Interview> interviews;
 
     @PrePersist
     protected void onCreate() {

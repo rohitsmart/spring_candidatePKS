@@ -38,4 +38,18 @@ public class EmployeeController {
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(employeeService.fetchCandidates(fromDate, toDate, page, size));
     }
+
+    @PostMapping("save-candidate")
+    @Operation(summary = "Fetch candidates and their scheduled interviews", description = "Fetch candidates based on interview date range and pagination")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful fetch of candidates and interviews", content = @Content(schema = @Schema(implementation = ListOfCandidate.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    public ResponseEntity<ListOfCandidate> fetchCandidate(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date toDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(employeeService.fetchCandidates(fromDate, toDate, page, size));
+    }
 }

@@ -2,12 +2,15 @@ package com.candidate.pks.employee.dto;
 
 import lombok.Data;
 import java.util.Date;
+import java.util.List;
+
 @Data
 public class CandidateResponse {
     private Integer id;
     private String firstName;
     private String lastName;
     private String email;
+    private String candidateId;
     private String phone;
     private String status;
     private String highSchoolPassOut;
@@ -36,5 +39,5 @@ public class CandidateResponse {
     private String dressingSense;
     private String overAll;
     private Date applicationDate;
-    private InterviewResponse interview;
+    private List<InterviewResponse> interview;
 }

@@ -1,8 +1,8 @@
 package com.candidate.pks.candidate.controller;
 
-import com.candidate.pks.auth.dto.AddEmployeeRequest;
 import com.candidate.pks.auth.dto.LoginResponse;
 import com.candidate.pks.candidate.dto.AddCandidateRequest;
+import com.candidate.pks.candidate.dto.InitialCommitRequest;
 import com.candidate.pks.candidate.service.CandidateService;
 import com.candidate.pks.repeat.Response;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,6 +26,7 @@ public class CandidateController {
 
     private final CandidateService candidateService;
 
+    // API need to be execute by Hr
     @PostMapping("save")
     @Operation(summary = "add  candidate", description = "Add Candidate ")
     @ApiResponses(value = {
@@ -36,4 +37,18 @@ public class CandidateController {
         Response response = candidateService.addCandidate(addCandidateRequest);
         return ResponseEntity.ok(response);
     }
+
+    // API need to be execute by Hr
+    @PostMapping("initial-commit")
+    @Operation(summary = "initial Commit to candidate", description = " initialCommit ")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful Added Employee", content = @Content(schema = @Schema(implementation = LoginResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    public ResponseEntity<Response> initialCommit(@RequestBody InitialCommitRequest initialCommitRequest) {
+        Response response = candidateService.initialCommit(initialCommitRequest);
+        return ResponseEntity.ok(response);
+    }
+
+
 }

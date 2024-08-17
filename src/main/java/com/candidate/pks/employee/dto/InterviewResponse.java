@@ -1,9 +1,7 @@
 package com.candidate.pks.employee.dto;
 
-
 import com.candidate.pks.Interview.model.InterviewStatus;
 import lombok.Data;
-
 import java.util.Date;
 
 @Data

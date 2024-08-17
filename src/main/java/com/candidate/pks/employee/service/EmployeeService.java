@@ -38,14 +38,13 @@ public class EmployeeService {
         } else {
             interviewsPage = interviewRepository.findUpcomingInterviewsByInterviewerIdAndInterviewStatus(interviewerId, today, InterviewStatus.SCHEDULED, pageRequest);
         }
-
         List<Interview> interviews = interviewsPage.getContent();
-
         List<CandidateResponse> candidateResponses = interviews.stream()
                 .map(interview -> {
                     Candidate candidate = interview.getCandidate();
                     CandidateResponse response = new CandidateResponse();
                     response.setId(candidate.getId());
+                    response.setCandidateId(candidate.getCandidateId());
                     response.setFirstName(candidate.getFirstName());
                     response.setLastName(candidate.getLastName());
                     response.setEmail(candidate.getEmail());
@@ -80,6 +79,7 @@ public class EmployeeService {
                     response.setOverAll(candidate.getOverAll());
                     response.setApplicationDate(candidate.getApplicationDate());
                     InterviewResponse interviewResponse = new InterviewResponse();
+
                     interviewResponse.setId(interview.getId());
                     interviewResponse.setInterviewDate(interview.getInterviewDate());
                     interviewResponse.setInterviewStatus(interview.getInterviewStatus());

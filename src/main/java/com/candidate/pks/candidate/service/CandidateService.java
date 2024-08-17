@@ -24,7 +24,7 @@ public class CandidateService {
             referralEmployee = employeeRepository.findById(addCandidateRequest.getReferralEmployeeId())
                     .orElse(null);
             if (referralEmployee == null) {
-                throw new RuntimeException("Referal Employee Does Not Exist");
+                throw new RuntimeException("Referral Employee Does Not Exist");
             }
         }
         Candidate candidate = Candidate.builder()

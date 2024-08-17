@@ -4,9 +4,7 @@ import com.candidate.pks.Interview.model.Interview;
 import com.candidate.pks.auth.model.Employee;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Getter
@@ -42,7 +40,6 @@ public class Candidate {
 
     private String cvUrl;
     private String candidateType;// front-end, back-end, fullstack,
-
 
     @ManyToOne
     @JoinColumn(name = "referral_employee_id")

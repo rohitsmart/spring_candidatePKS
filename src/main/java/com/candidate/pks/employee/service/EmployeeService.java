@@ -13,8 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import java.util.Date;
-import java.util.List;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,7 +27,8 @@ public class EmployeeService {
     private final UserDetail userDetail;
 
     public ListOfCandidate fetchCandidates(Date fromDate, Date toDate, int page, int size) {
-        Integer interviewerId = userDetail.getUser().getEmployee().getId();
+//        Integer interviewerId = userDetail.getUser().getEmployee().getId();
+        Integer interviewerId = 1;
 
         PageRequest pageRequest = PageRequest.of(page, size);
         Date today = new Date();
@@ -38,10 +39,23 @@ public class EmployeeService {
         } else {
             interviewsPage = interviewRepository.findUpcomingInterviewsByInterviewerIdAndInterviewStatus(interviewerId, today, InterviewStatus.SCHEDULED, pageRequest);
         }
+
         List<Interview> interviews = interviewsPage.getContent();
-        List<CandidateResponse> candidateResponses = interviews.stream()
-                .map(interview -> {
-                    Candidate candidate = interview.getCandidate();
+        Map<Candidate, List<Interview>> candidateInterviewsMap = new HashMap<>();
+
+        // Group interviews by candidate
+        for (Interview interview : interviews) {
+            Candidate candidate = interview.getCandidate();
+            candidateInterviewsMap
+                    .computeIfAbsent(candidate, k -> new ArrayList<>())
+                    .add(interview);
+        }
+
+        List<CandidateResponse> candidateResponses = candidateInterviewsMap.entrySet().stream()
+                .map(entry -> {
+                    Candidate candidate = entry.getKey();
+                    List<Interview> candidateInterviews = entry.getValue();
+
                     CandidateResponse response = new CandidateResponse();
                     response.setId(candidate.getId());
                     response.setCandidateId(candidate.getCandidateId());
@@ -78,13 +92,20 @@ public class EmployeeService {
                     response.setDressingSense(candidate.getDressingSense());
                     response.setOverAll(candidate.getOverAll());
                     response.setApplicationDate(candidate.getApplicationDate());
-                    InterviewResponse interviewResponse = new InterviewResponse();
 
-                    interviewResponse.setId(interview.getId());
-                    interviewResponse.setInterviewDate(interview.getInterviewDate());
-                    interviewResponse.setInterviewStatus(interview.getInterviewStatus());
-                    interviewResponse.setFeedback(interview.getFeedback());
-                    response.setInterview(interviewResponse);
+                    // Map interviews for this candidate
+                    List<InterviewResponse> interviewResponses = candidateInterviews.stream()
+                            .map(interview -> {
+                                InterviewResponse interviewResponse = new InterviewResponse();
+                                interviewResponse.setId(interview.getId());
+                                interviewResponse.setInterviewDate(interview.getInterviewDate());
+                                interviewResponse.setInterviewStatus(interview.getInterviewStatus());
+                                interviewResponse.setFeedback(interview.getFeedback());
+                                return interviewResponse;
+                            })
+                            .collect(Collectors.toList());
+                    response.setInterview(interviewResponses);
+
                     return response;
                 })
                 .collect(Collectors.toList());
@@ -95,5 +116,7 @@ public class EmployeeService {
         listOfCandidate.setCurrentPage(interviewsPage.getNumber());
         return listOfCandidate;
     }
+
+
 
 }

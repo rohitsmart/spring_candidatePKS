@@ -1,7 +1,6 @@
 package com.candidate.pks.candidate.service;
 
 import com.candidate.pks.candidate.dto.AddCandidateRequest;
-import com.candidate.pks.candidate.dto.InitialCommitRequest;
 import com.candidate.pks.candidate.model.Candidate;
 import com.candidate.pks.candidate.model.Status;
 import com.candidate.pks.candidate.repository.CandidateRepository;
@@ -25,7 +24,7 @@ public class CandidateService {
             referralEmployee = employeeRepository.findById(addCandidateRequest.getReferralEmployeeId())
                     .orElse(null);
             if (referralEmployee == null) {
-                throw new RuntimeException("Referral Employee Does Not Exist");
+                throw new RuntimeException("Referal Employee Does Not Exist");
             }
         }
         Candidate candidate = Candidate.builder()
@@ -46,9 +45,5 @@ public class CandidateService {
         candidateRepository.save(candidate);
 
         return new Response("Candidate added successfully.");
-    }
-
-    public Response initialCommit(InitialCommitRequest initialCommitRequest) {
-        return null;
     }
 }

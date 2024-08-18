@@ -7,10 +7,10 @@ import java.util.List;
 @Data
 public class CandidateResponse {
     private Integer id;
+    private String candidateId;
     private String firstName;
     private String lastName;
     private String email;
-    private String candidateId;
     private String phone;
     private String status;
     private String highSchoolPassOut;

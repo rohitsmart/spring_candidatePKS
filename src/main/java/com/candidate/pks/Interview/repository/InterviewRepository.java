@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Repository
 public interface InterviewRepository extends JpaRepository<Interview, Integer> {
@@ -18,4 +19,7 @@ public interface InterviewRepository extends JpaRepository<Interview, Integer> {
 
     @Query("SELECT i FROM Interview i WHERE i.interviewerName.id = ?1 AND i.interviewDate >= ?2 AND i.interviewStatus = ?3")
     Page<Interview> findUpcomingInterviewsByInterviewerIdAndInterviewStatus(Integer interviewerId, Date currentDate, InterviewStatus status, PageRequest pageRequest);
+
+    @Override
+    Optional<Interview> findById(Integer integer);
 }

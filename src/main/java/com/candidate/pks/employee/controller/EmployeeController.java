@@ -1,5 +1,6 @@
 package com.candidate.pks.employee.controller;
 
+import com.candidate.pks.employee.dto.CandidateRequest;
 import com.candidate.pks.employee.dto.ListOfCandidate;
 import com.candidate.pks.employee.service.EmployeeService;
 import com.candidate.pks.repeat.Response;
@@ -37,5 +38,19 @@ public class EmployeeController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(employeeService.fetchCandidates(fromDate, toDate, page, size));
+    }
+
+    // face to face records filled by Employee for then candidate
+
+    @PostMapping("candidate-first-round")
+    @Operation(summary = "Fetch candidates and their scheduled interviews", description = "Fetch candidates based on interview date range and pagination")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful fetch of candidates and interviews", content = @Content(schema = @Schema(implementation = ListOfCandidate.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    public ResponseEntity<Response> saveCandidateFirstRound(
+            @RequestParam("candidateId") String candidateID ,
+            @RequestBody CandidateRequest candidateRequest){
+        return ResponseEntity.ok(employeeService.saveCandidateFirstRound(candidateID,candidateRequest));
     }
 }

@@ -4,6 +4,7 @@ public enum Status {
     APPLIED,
     INTERVIEWED,
     SELECTED,
-    REJECTED
+    REJECTED,
+    QUALIFYFORNEXTROUND,
 }
 

@@ -28,6 +28,7 @@ public class Interview {
     @JoinColumn(name = "interviewer_name_id")
     private Employee interviewerName;
 
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date interviewDate;
 

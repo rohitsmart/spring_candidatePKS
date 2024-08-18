@@ -1,13 +1,16 @@
 package com.candidate.pks.employee.service;
 
 import com.candidate.pks.candidate.model.Candidate;
+import com.candidate.pks.candidate.model.Status;
 import com.candidate.pks.candidate.repository.CandidateRepository;
 import com.candidate.pks.Interview.model.Interview;
 import com.candidate.pks.Interview.model.InterviewStatus;
 import com.candidate.pks.Interview.repository.InterviewRepository;
+import com.candidate.pks.employee.dto.CandidateRequest;
 import com.candidate.pks.employee.dto.CandidateResponse;
 import com.candidate.pks.employee.dto.InterviewResponse;
 import com.candidate.pks.employee.dto.ListOfCandidate;
+import com.candidate.pks.repeat.Response;
 import com.candidate.pks.security.UserDetail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -117,6 +120,36 @@ public class EmployeeService {
         return listOfCandidate;
     }
 
+    public Response saveCandidateFirstRound(String candidateID, CandidateRequest candidateRequest) {
+        var interview = interviewRepository.findById(candidateRequest.getInterviewId())
+                .orElseThrow(() -> new RuntimeException("Interview not found with ID: " + candidateRequest.getInterviewId()));
 
+        interview.setFeedback(candidateRequest.getFeedback());
+        interview.setInterviewStatus(candidateRequest.getInterviewStatus());
+
+        var candidate = interview.getCandidate();
+
+        candidate.setDsaRating(candidateRequest.getDsaRating());
+        candidate.setReactRating(candidateRequest.getReactRating());
+        candidate.setJavascriptRating(candidateRequest.getJavascriptRating());
+        candidate.setOopsRating(candidateRequest.getOopsRating());
+        candidate.setSqlRating(candidateRequest.getSqlRating());
+        candidate.setJavaRating(candidateRequest.getJavaRating());
+        candidate.setPhpRating(candidateRequest.getPhpRating());
+        candidate.setPythonRating(candidateRequest.getPythonRating());
+        candidate.setHtmlRating(candidateRequest.getHtmlRating());
+        candidate.setCssRating(candidateRequest.getCssRating());
+        candidate.setBootstrapRating(candidateRequest.getBootstrapRating());
+        candidate.setMaterialUiRating(candidateRequest.getMaterialUiRating());
+        candidate.setTailwindCssRating(candidateRequest.getTailwindCssRating());
+        candidate.setFlutterRating(candidateRequest.getFlutterRating());
+        candidate.setReactNativeRating(candidateRequest.getReactNativeRating());
+        candidate.setMachineLearning(candidateRequest.getMachineLearning());
+        candidate.setStatus(Status.INTERVIEWED);
+
+        candidateRepository.save(candidate);
+        interviewRepository.save(interview);
+        return new Response("Candidate and interview details updated successfully");
+    }
 
 }

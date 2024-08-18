@@ -1,11 +1,12 @@
 package com.candidate.pks.candidate.service;
 
 import com.candidate.pks.candidate.dto.AddCandidateRequest;
+import com.candidate.pks.candidate.dto.UpdateCandidateRequest;
 import com.candidate.pks.candidate.model.Candidate;
-import com.candidate.pks.candidate.model.Status;
 import com.candidate.pks.candidate.repository.CandidateRepository;
 import com.candidate.pks.auth.model.Employee;
 import com.candidate.pks.auth.repository.EmployeeRepository;
+import com.candidate.pks.exception.CandidateNotFoundException;
 import com.candidate.pks.repeat.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -45,5 +46,17 @@ public class CandidateService {
         candidateRepository.save(candidate);
 
         return new Response("Candidate added successfully.");
+    }
+
+
+    public Response updateStatus(UpdateCandidateRequest updateCandidateRequest) {
+        var candidate = candidateRepository.findByCandidateId(updateCandidateRequest.getCandidateId()).orElseThrow(
+                ()-> new CandidateNotFoundException("Candidate not found exception")
+        );
+        candidate.setStatus(updateCandidateRequest.getStatus());
+        candidateRepository.save(candidate);
+        return Response.builder()
+                .message("Candidate status updated")
+                .build();
     }
 }

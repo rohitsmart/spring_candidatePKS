@@ -16,21 +16,30 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/public/")
 @RequiredArgsConstructor
-@Tag(name = "Authentication", description = "APIs related to user authentication and registration")
+@Tag(name = "Authentication", description = "Handles user authentication, including login and token management.")
 public class AuthController {
 
     private final AuthService authService;
 
     @PostMapping("login")
-    @Operation(summary = "User Login", description = "Authenticate user and return a token")
+    @Operation(
+            summary = "Authenticate User",
+            description = "Validates the user's credentials and provides an authentication token upon successful login.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "User's login credentials, including username and password.",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = LoginRequest.class))
+            )
+    )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful login", content = @Content(schema = @Schema(implementation = LoginResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized")
+            @ApiResponse(responseCode = "200", description = "Login successful. Returns authentication token and user details.",
+                    content = @Content(schema = @Schema(implementation = LoginResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input. Check the submitted login details."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized. Invalid credentials or account is locked."),
+            @ApiResponse(responseCode = "500", description = "Internal server error. Please try again later.")
     })
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
         LoginResponse response = authService.login(loginRequest);
         return ResponseEntity.ok(response);
     }
-
-
 }

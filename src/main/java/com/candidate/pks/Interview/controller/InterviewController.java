@@ -19,55 +19,80 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/protected/interview/")
 @RequiredArgsConstructor
-@Tag(name = "Interview", description = "APIs related to Interview Management")
+@Tag(name = "Interview Management", description = "Endpoints for managing interview scheduling, interviewer transfer, and interview status updates.")
 public class InterviewController {
 
     private final InterviewService interviewService;
 
-    // to be filled by Hr //
-
-    // will schedule first round interview
     @PostMapping("schedule")
-    @Operation(summary = "schedule", description = "Add scheduled ")
+    @Operation(
+            summary = "Schedule Interview",
+            description = "Schedule a new interview for a candidate. This endpoint is typically used by HR to organize the first round of interviews."
+    )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful Added Employee", content = @Content(schema = @Schema(implementation = LoginResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized")
+            @ApiResponse(responseCode = "200", description = "Interview scheduled successfully.",
+                    content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data. Please verify the scheduling details."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized. You do not have the necessary permissions to access this resource."),
+            @ApiResponse(responseCode = "500", description = "Internal server error. An unexpected error occurred while processing the request.")
     })
     public ResponseEntity<Response> createScheduled(@RequestBody ScheduledInterviewRequest scheduledInterviewRequest) {
         Response response = interviewService.createScheduled(scheduledInterviewRequest);
         return ResponseEntity.ok(response);
     }
-    // to be filled by Hr //
+
     @PostMapping("transfer-interviewer")
-    @Operation(summary = "schedule", description = "Add scheduled ")
+    @Operation(
+            summary = "Transfer Interviewer",
+            description = "Transfer the responsibility of an ongoing interview to another interviewer. This is used to assign a different interviewer mid-process."
+    )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful Added Employee", content = @Content(schema = @Schema(implementation = LoginResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized")
+            @ApiResponse(responseCode = "200", description = "Interviewer transferred successfully.",
+                    content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data. Please verify the interview ID and the new interviewer details."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized. You do not have the necessary permissions to perform this action."),
+            @ApiResponse(responseCode = "500", description = "Internal server error. An unexpected error occurred while processing the request.")
     })
-    public ResponseEntity<Response> transferInterviewer(@RequestParam("interviewID") Integer interviewID, @RequestBody ScheduledInterviewRequest scheduledInterviewRequest) {
-        Response response = interviewService.transferInterviewer(interviewID,scheduledInterviewRequest);
+    public ResponseEntity<Response> transferInterviewer(
+            @RequestParam("interviewID") Integer interviewID,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Details of the new interviewer and the updated schedule.",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = ScheduledInterviewRequest.class))
+            )
+            @RequestBody ScheduledInterviewRequest scheduledInterviewRequest) {
+        Response response = interviewService.transferInterviewer(interviewID, scheduledInterviewRequest);
         return ResponseEntity.ok(response);
     }
 
-    // to be filled by Hr //
     @PostMapping("first-information")
-    @Operation(summary = "update  candidate", description = "update Candidate ")
+    @Operation(
+            summary = "Submit Initial Interview Feedback",
+            description = "Submit the initial feedback or commit records after conducting the first round of interviews with a candidate."
+    )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful updated Employee", content = @Content(schema = @Schema(implementation = LoginResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized")
+            @ApiResponse(responseCode = "200", description = "Candidate information updated successfully.",
+                    content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data. Please verify the feedback details."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized. You do not have the necessary permissions to perform this action."),
+            @ApiResponse(responseCode = "500", description = "Internal server error. An unexpected error occurred while processing the request.")
     })
     public ResponseEntity<Response> updateCandidate(@RequestBody InitialCommitRequest initialCommitRequest) {
         Response response = interviewService.updateCandidate(initialCommitRequest);
         return ResponseEntity.ok(response);
     }
 
-    // to be filled by Hr //
-    // update interview status;
     @PostMapping("update-interview-status")
-    @Operation(summary = "update  candidate", description = "update Candidate ")
+    @Operation(
+            summary = "Update Interview Status",
+            description = "Update the status of a candidate's interview, such as marking it as completed, passed, or failed."
+    )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful updated Employee", content = @Content(schema = @Schema(implementation = LoginResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized")
+            @ApiResponse(responseCode = "200", description = "Interview status updated successfully.",
+                    content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data. Please verify the status update details."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized. You do not have the necessary permissions to perform this action."),
+            @ApiResponse(responseCode = "500", description = "Internal server error. An unexpected error occurred while processing the request.")
     })
     public ResponseEntity<Response> updateInterviewStatus(@RequestBody UpdateInterviewStatusRequest updateInterviewStatusRequest) {
         Response response = interviewService.updateInterviewStatus(updateInterviewStatusRequest);

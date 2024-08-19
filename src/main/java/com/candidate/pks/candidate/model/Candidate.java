@@ -87,5 +87,12 @@ public class Candidate {
         applicationDate = new Date();
         status= Status.APPLIED;
     }
+
+    @Temporal(TemporalType.DATE)
+    private Date dob; // Date of Birth
+
+    private String district; // Address
+
+    private String state;
 }
 

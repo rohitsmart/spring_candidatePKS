@@ -1,6 +1,5 @@
 package com.candidate.pks.auth.model;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -12,11 +11,13 @@ public enum Designation {
     FRONTEND_DEV("Front-end Developer"),
     JUNIOR_HR("Junior HR"),
     SENIOR_HR("Senior HR"),
+    MANAGER("Manager"),
+    HR("HR"),
+    JUNIOR_MANAGER("Junior Manager"),
     CEO("Chief Executive Officer"),
     SOFTWARE_ENGINEER("Software Engineer"),
     NATIVE_DEV("Native Developer"),
     FLUTTER_DEV("Flutter Developer");
 
     private final String designationName;
-
 }

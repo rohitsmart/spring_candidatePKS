@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to PerfectKode</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            max-width: 150px;
+        }
+        .content {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #888888;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Welcome to PerfectKode</h1>
+    </div>
+    <div class="content">
+        <p>Dear <span th:text="${firstName}"></span> <span th:text="${lastName}"></span>,</p>
+        <p>Welcome to PerfectKode! Your account has been successfully created.</p>
+        <p><strong>Employee ID:</strong> <span th:text="${empId}"></span></p>
+        <p><strong>Password:</strong> <span th:text="${password}"></span></p>
+        <p>Please keep this information safe. If you have any questions, feel free to contact our support team.</p>
+    </div>
+    <div class="footer">
+        <p>Best regards,<br>The Candidate Team</p>
+    </div>
+</div>
+</body>
+</html>

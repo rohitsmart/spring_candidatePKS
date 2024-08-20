@@ -46,7 +46,7 @@ public class ManagementService {
 
         try {
             log.info("Sending email to: {}", request.getUserRequest().getEmail());
-            mailService.sendEmail(request.getUserRequest().getEmail(), request.getFirstName(), request.getLastName(), request.getEmpId(), password);
+            mailService.sendUserPassword(request.getUserRequest().getEmail(), request.getFirstName(), request.getLastName(), request.getEmpId(), password);
         } catch (MessagingException | IOException e) {
             log.error("Error sending email to {}: {}", request.getUserRequest().getEmail(), e.getMessage());
             return new Response("Employee created, but email sending failed.");

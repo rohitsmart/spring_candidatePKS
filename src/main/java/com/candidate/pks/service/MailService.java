@@ -38,7 +38,7 @@ public class MailService {
         log.info("Simple message sent to: {}", to);
     }
 
-    public void sendEmail(String to, String firstName, String lastName, String empId, String password) throws MessagingException, IOException {
+    public void sendUserPassword(String to, String firstName, String lastName, String empId, String password) throws MessagingException, IOException {
         log.info("Preparing to send email to: {}", to);
 
         Context context = new Context();
@@ -47,7 +47,7 @@ public class MailService {
         context.setVariable("empId", empId);
         context.setVariable("password", password);
 
-        String emailContent = templateEngine.process("email-template", context);
+        String emailContent = templateEngine.process("sendPassword-template", context);
         log.debug("Email content prepared: {}", emailContent);
 
         MimeMessage message = javaMailSender.createMimeMessage();

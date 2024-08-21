@@ -3,6 +3,7 @@ package com.candidate.pks.auth.controller;
 import com.candidate.pks.auth.dto.AddEmployeeRequest;
 import com.candidate.pks.auth.dto.EmployeeResponseDTO;
 import com.candidate.pks.auth.dto.UserEmployeeResponse;
+import com.candidate.pks.auth.dto.UserEmployeeResponseList;
 import com.candidate.pks.auth.model.User;
 import com.candidate.pks.auth.service.ManagementService;
 import com.candidate.pks.repeat.Response;
@@ -94,5 +95,22 @@ public class ManagementController {
                 .build();
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("emp-data")
+    @Operation(
+            summary = "Get User and Employee Details",
+            description = "Returns details of the user and the associated employee. This operation requires authentication and authorization."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved user and employee details.",
+                    content = @Content(schema = @Schema(implementation = UserEmployeeResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request parameters."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized. Access is denied due to invalid credentials or insufficient permissions."),
+            @ApiResponse(responseCode = "500", description = "Internal server error. An unexpected error occurred while processing the request.")
+    })
+    public ResponseEntity<UserEmployeeResponseList> getUserEmployeeData() {
+
+        return ResponseEntity.ok(managementService.getUserEmployeeData());
     }
 }

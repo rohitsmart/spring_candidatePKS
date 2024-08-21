@@ -1,7 +1,9 @@
 package com.candidate.pks.auth.service;
 
 import com.candidate.pks.auth.dto.AddEmployeeRequest;
+import com.candidate.pks.auth.dto.EmployeeData;
 import com.candidate.pks.auth.dto.EmployeeResponseDTO;
+import com.candidate.pks.auth.dto.UserEmployeeResponseList;
 import com.candidate.pks.auth.model.Employee;
 import com.candidate.pks.auth.model.User;
 import com.candidate.pks.auth.model.UserRole;
@@ -23,6 +25,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -95,4 +99,26 @@ public class ManagementService {
                 .joiningDate(String.valueOf(employee.getJoiningDate()))
                 .build());
     }
+
+    public UserEmployeeResponseList getUserEmployeeData() {
+        try {
+            List<Employee> employees = employeeRepository.findAll();
+
+            List<EmployeeData> employeeDataList = employees.stream().map(employee -> {
+                EmployeeData employeeData = new EmployeeData();
+                employeeData.setEmpId(employee.getEmpId());
+                employeeData.setFullName(employee.getFirstName() + " " + employee.getLastName());
+                return employeeData;
+            }).collect(Collectors.toList());
+
+            UserEmployeeResponseList userEmployeeResponse = new UserEmployeeResponseList();
+            userEmployeeResponse.setData(true);
+            userEmployeeResponse.setEmployeeData(employeeDataList);
+
+            return userEmployeeResponse;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
 }

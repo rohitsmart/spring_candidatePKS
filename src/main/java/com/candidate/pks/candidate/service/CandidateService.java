@@ -6,28 +6,44 @@ import com.candidate.pks.candidate.model.Candidate;
 import com.candidate.pks.candidate.repository.CandidateRepository;
 import com.candidate.pks.auth.model.Employee;
 import com.candidate.pks.auth.repository.EmployeeRepository;
+import com.candidate.pks.exception.BadDateAndTimeFormatException;
 import com.candidate.pks.exception.CandidateNotFoundException;
 import com.candidate.pks.repeat.Response;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CandidateService {
 
     private final CandidateRepository candidateRepository;
     private final EmployeeRepository employeeRepository;
 
     public Response addCandidate(AddCandidateRequest addCandidateRequest) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate dob;
+        try {
+            dob = LocalDate.parse(addCandidateRequest.getDob(), formatter);
+        } catch (DateTimeParseException e) {
+            log.error("Invalid date format for dob: {}", addCandidateRequest.getDob());
+            throw new BadDateAndTimeFormatException("Invalid date format for dob. Please use dd/MM/yyyy.");
+        }
 
         Employee referralEmployee = null;
-        if (addCandidateRequest.getReferralEmployeeId() != null) {
+        if (addCandidateRequest.getReferralEmployeeId() != null && addCandidateRequest.getReferralEmployeeId() != 0) {
             referralEmployee = employeeRepository.findById(addCandidateRequest.getReferralEmployeeId())
                     .orElse(null);
             if (referralEmployee == null) {
-                throw new RuntimeException("Referal Employee Does Not Exist");
+                throw new RuntimeException("Referral Employee Does Not Exist");
             }
         }
+
         Candidate candidate = Candidate.builder()
                 .firstName(addCandidateRequest.getFirstName())
                 .lastName(addCandidateRequest.getLastName())
@@ -46,7 +62,7 @@ public class CandidateService {
                 .masterDegree(addCandidateRequest.getMasterDegree())
                 .district(addCandidateRequest.getDistrict())
                 .state(addCandidateRequest.getState())
-                .dob(addCandidateRequest.getDob())
+                .dob(dob) // Use the parsed LocalDate here
                 .build();
 
         candidateRepository.save(candidate);

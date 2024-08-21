@@ -20,7 +20,7 @@ public class AddCandidateRequest {
     private String cvUrl;
     private String candidateType;
     private Integer referralEmployeeId;
-    private Date dob;
+    private String dob;
     private String district;
     private String state;
     private String address;

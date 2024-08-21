@@ -4,7 +4,9 @@ import com.candidate.pks.Interview.model.Interview;
 import com.candidate.pks.auth.model.Employee;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -89,8 +91,8 @@ public class Candidate {
         applicationDate = new Date();
         status= Status.APPLIED;
     }
-    @Temporal(TemporalType.DATE)
-    private Date dob;
+    @DateTimeFormat(pattern = "dd/MM/yyyy")
+    private LocalDate dob;
     private String district;
     private String state;
     private String address;

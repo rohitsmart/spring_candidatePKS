@@ -1,15 +1,20 @@
 package com.candidate.pks.auth.service;
 
 import com.candidate.pks.auth.dto.AddEmployeeRequest;
+import com.candidate.pks.auth.dto.EmployeeResponseDTO;
 import com.candidate.pks.auth.model.Employee;
 import com.candidate.pks.auth.model.User;
 import com.candidate.pks.auth.model.UserRole;
+import com.candidate.pks.auth.repository.EmployeeRepository;
 import com.candidate.pks.auth.repository.UserRepository;
 import com.candidate.pks.repeat.Response;
 import com.candidate.pks.service.MailService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -20,6 +25,7 @@ import java.io.IOException;
 public class ManagementService {
 
     private final UserRepository userRepository;
+    private final EmployeeRepository employeeRepository;
     private final MailService mailService;
 
     public Response addEmployee(AddEmployeeRequest request) {
@@ -54,5 +60,18 @@ public class ManagementService {
 
         log.info("Employee and user created successfully with ID: {}", request.getEmpId());
         return new Response("Employee and user created successfully.");
+    }
+
+    public Page<EmployeeResponseDTO> getEmployees(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Employee> employeePage = employeeRepository.findAll(pageable);
+
+        return employeePage.map(employee -> EmployeeResponseDTO.builder()
+                .empId(employee.getId())
+                .name(employee.getFirstName() + " " + employee.getLastName())
+                .designation(employee.getDesignation().name())
+                .email(employee.getUser() != null ? employee.getUser().getUsername() : null)
+                .joiningDate(employee.getJoiningDate())
+                .build());
     }
 }

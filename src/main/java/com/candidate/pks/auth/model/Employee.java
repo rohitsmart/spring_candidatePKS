@@ -2,6 +2,9 @@ package com.candidate.pks.auth.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -27,4 +30,10 @@ public class Employee {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Designation designation;
+
+    @DateTimeFormat(pattern = "dd/MM/yyyy")
+    private LocalDate joiningDate;
+
+    @OneToOne(mappedBy = "employee")
+    private User user;
 }

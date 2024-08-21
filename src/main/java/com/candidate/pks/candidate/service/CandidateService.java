@@ -37,7 +37,7 @@ public class CandidateService {
 
         Employee referralEmployee = null;
         if (addCandidateRequest.getReferralEmployeeId() != null && addCandidateRequest.getReferralEmployeeId() != 0) {
-            referralEmployee = employeeRepository.findById(addCandidateRequest.getReferralEmployeeId())
+            referralEmployee = employeeRepository.findByEmpId(String.valueOf(addCandidateRequest.getReferralEmployeeId()))
                     .orElse(null);
             if (referralEmployee == null) {
                 throw new RuntimeException("Referral Employee Does Not Exist");

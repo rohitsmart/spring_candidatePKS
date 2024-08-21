@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee,Integer> {
@@ -15,4 +16,7 @@ public interface EmployeeRepository extends JpaRepository<Employee,Integer> {
             "FROM Employee e WHERE LOWER(e.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
             "OR LOWER(e.lastName) LIKE LOWER(CONCAT('%', :search, '%'))")
     List<EmployeeData> searchByName(@Param("search") String search);
+
+    @Query("select e from Employee e where e.empId = ?1")
+    Optional<Employee> findByEmpId(String empId);
 }

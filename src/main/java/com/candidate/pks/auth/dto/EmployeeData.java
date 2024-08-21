@@ -1,10 +1,13 @@
 package com.candidate.pks.auth.dto;
 
-import jakarta.persistence.Column;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EmployeeData {
     private String empId;
-    private String fullName;//concat first and last name;
+    private String fullName;
 }

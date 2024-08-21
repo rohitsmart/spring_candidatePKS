@@ -100,16 +100,9 @@ public class ManagementService {
                 .build());
     }
 
-    public UserEmployeeResponseList getUserEmployeeData() {
+    public UserEmployeeResponseList getUserEmployeeData(String search) {
         try {
-            List<Employee> employees = employeeRepository.findAll();
-
-            List<EmployeeData> employeeDataList = employees.stream().map(employee -> {
-                EmployeeData employeeData = new EmployeeData();
-                employeeData.setEmpId(employee.getEmpId());
-                employeeData.setFullName(employee.getFirstName() + " " + employee.getLastName());
-                return employeeData;
-            }).collect(Collectors.toList());
+            List<EmployeeData> employeeDataList = employeeRepository.searchByName(search);
 
             UserEmployeeResponseList userEmployeeResponse = new UserEmployeeResponseList();
             userEmployeeResponse.setData(true);
@@ -120,5 +113,4 @@ public class ManagementService {
             throw new RuntimeException(e.getMessage());
         }
     }
-
 }

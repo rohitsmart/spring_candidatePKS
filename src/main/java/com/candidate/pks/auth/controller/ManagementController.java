@@ -97,20 +97,22 @@ public class ManagementController {
         return ResponseEntity.ok(response);
     }
 
+
     @GetMapping("emp-data")
     @Operation(
             summary = "Get User and Employee Details",
-            description = "Returns details of the user and the associated employee. This operation requires authentication and authorization."
+            description = "Returns details of the user and the associated employee. This operation requires authentication and authorization. You can search employees by providing a search string."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved user and employee details.",
-                    content = @Content(schema = @Schema(implementation = UserEmployeeResponse.class))),
+                    content = @Content(schema = @Schema(implementation = UserEmployeeResponseList.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request parameters."),
             @ApiResponse(responseCode = "401", description = "Unauthorized. Access is denied due to invalid credentials or insufficient permissions."),
             @ApiResponse(responseCode = "500", description = "Internal server error. An unexpected error occurred while processing the request.")
     })
-    public ResponseEntity<UserEmployeeResponseList> getUserEmployeeData() {
-
-        return ResponseEntity.ok(managementService.getUserEmployeeData());
+    public ResponseEntity<UserEmployeeResponseList> getUserEmployeeData(
+            @RequestParam(required = false, defaultValue = "") String search) {
+        return ResponseEntity.ok(managementService.getUserEmployeeData(search));
     }
+
 }

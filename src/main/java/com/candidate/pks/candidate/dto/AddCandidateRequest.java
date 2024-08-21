@@ -13,11 +13,15 @@ public class AddCandidateRequest {
     private Status status;
     private String highSchoolPassOut;
     private String intermediatePassOut;
+    private String bachelorDegree;
     private String bachelorPassOut;
+    private String masterDegree;
     private String masterPassOut;
     private String cvUrl;
     private String candidateType;
     private Integer referralEmployeeId;
     private Date dob;
+    private String district;
+    private String state;
     private String address;
 }

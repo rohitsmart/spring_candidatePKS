@@ -41,6 +41,12 @@ public class CandidateService {
                 .cvUrl(addCandidateRequest.getCvUrl())
                 .candidateType(addCandidateRequest.getCandidateType())
                 .referralEmployee(referralEmployee)
+                .address(addCandidateRequest.getAddress())
+                .bachelorDegree(addCandidateRequest.getBachelorDegree())
+                .masterDegree(addCandidateRequest.getMasterDegree())
+                .district(addCandidateRequest.getDistrict())
+                .state(addCandidateRequest.getState())
+                .dob(addCandidateRequest.getDob())
                 .build();
 
         candidateRepository.save(candidate);

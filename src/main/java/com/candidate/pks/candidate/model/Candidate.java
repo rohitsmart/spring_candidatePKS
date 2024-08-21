@@ -40,7 +40,10 @@ public class Candidate {
 
     private String highSchoolPassOut;
     private String intermediatePassOut;
+
+    private String bachelorDegree;
     private String bachelorPassOut;
+    private String masterDegree;
     private String masterPassOut;
 
     private String cvUrl;
@@ -68,13 +71,12 @@ public class Candidate {
     private int flutterRating;
     private int reactNativeRating;
     private int machineLearning;
+
     /** Start things to be filled by HR **/
     private String communication;
     private String dressingSense;
     private String overAll;
     /** End things to be filled by HR **/
-
-
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date applicationDate;
@@ -87,12 +89,10 @@ public class Candidate {
         applicationDate = new Date();
         status= Status.APPLIED;
     }
-
     @Temporal(TemporalType.DATE)
-    private Date dob; // Date of Birth
-
-    private String district; // Address
-
+    private Date dob;
+    private String district;
     private String state;
+    private String address;
 }
 

@@ -1,21 +1,27 @@
 package com.candidate.pks.candidate.service;
 
-import com.candidate.pks.candidate.dto.AddCandidateRequest;
-import com.candidate.pks.candidate.dto.UpdateCandidateRequest;
+import com.candidate.pks.candidate.dto.*;
 import com.candidate.pks.candidate.model.Candidate;
+import com.candidate.pks.candidate.model.Status;
 import com.candidate.pks.candidate.repository.CandidateRepository;
 import com.candidate.pks.auth.model.Employee;
 import com.candidate.pks.auth.repository.EmployeeRepository;
 import com.candidate.pks.exception.BadDateAndTimeFormatException;
 import com.candidate.pks.exception.CandidateNotFoundException;
 import com.candidate.pks.repeat.Response;
+import com.candidate.pks.util.CandidateIdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +30,8 @@ public class CandidateService {
 
     private final CandidateRepository candidateRepository;
     private final EmployeeRepository employeeRepository;
+    @Autowired
+    private final CandidateIdGenerator candidateIdGenerator;
 
     public Response addCandidate(AddCandidateRequest addCandidateRequest) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -43,8 +51,10 @@ public class CandidateService {
                 throw new RuntimeException("Referral Employee Does Not Exist");
             }
         }
+        String candidateId = candidateIdGenerator.generateCandidateId();
 
         Candidate candidate = Candidate.builder()
+                .candidateId(candidateId)
                 .firstName(addCandidateRequest.getFirstName())
                 .lastName(addCandidateRequest.getLastName())
                 .email(addCandidateRequest.getEmail())
@@ -70,7 +80,6 @@ public class CandidateService {
         return new Response("Candidate added successfully.");
     }
 
-
     public Response updateStatus(UpdateCandidateRequest updateCandidateRequest) {
         var candidate = candidateRepository.findByCandidateId(updateCandidateRequest.getCandidateId()).orElseThrow(
                 ()-> new CandidateNotFoundException("Candidate not found exception")
@@ -81,4 +90,54 @@ public class CandidateService {
                 .message("Candidate status updated")
                 .build();
     }
+
+    public CandidateResponseList fetchAllCandidates(FetchCandidatesRequest request, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        LocalDate fromDate = request.getFromDate();
+        Status status = request.getStatus();
+
+        Page<Candidate> candidatePage;
+        if (fromDate != null && status != null) {
+            candidatePage = candidateRepository.findByApplicationDateAfterAndStatus(fromDate, status, pageable);
+        } else if (fromDate != null) {
+            candidatePage = candidateRepository.findByApplicationDateAfter(fromDate, pageable);
+        } else if (status != null) {
+            candidatePage = candidateRepository.findByStatus(status, pageable);
+        } else {
+            candidatePage = candidateRepository.findAll(pageable);
+        }
+
+        List<CandidateResponseDTO> candidates = candidatePage.getContent().stream()
+                .map(candidate -> {
+                    String referralEmployeeInfo = null;
+                    if (candidate.getReferralEmployee() != null) {
+                        String empId = candidate.getReferralEmployee().getEmpId();
+                        String firstName = candidate.getReferralEmployee().getFirstName();
+                        String lastName = candidate.getReferralEmployee().getLastName();
+                        referralEmployeeInfo = empId + " " + firstName + " " + lastName;
+                    }
+
+                    return new CandidateResponseDTO(
+                            candidate.getCandidateId(),
+                            candidate.getFirstName(),
+                            candidate.getLastName(),
+                            candidate.getEmail(),
+                            candidate.getPhone(),
+                            candidate.getStatus().name(),
+                            candidate.getCandidateType(),
+                            referralEmployeeInfo
+                    );
+                })
+                .toList();
+
+        CandidateResponseList responseList = new CandidateResponseList();
+        responseList.setCandidates(candidates);
+        responseList.setTotalCandidates(candidatePage.getTotalElements());
+        responseList.setTotalPages(candidatePage.getTotalPages());
+        responseList.setCurrentPage(candidatePage.getNumber());
+
+        return responseList;
+    }
+
 }

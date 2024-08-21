@@ -1,7 +1,10 @@
 package com.candidate.pks.candidate.controller;
 
 import com.candidate.pks.candidate.dto.AddCandidateRequest;
+import com.candidate.pks.candidate.dto.CandidateResponseList;
+import com.candidate.pks.candidate.dto.FetchCandidatesRequest;
 import com.candidate.pks.candidate.dto.UpdateCandidateRequest;
+import com.candidate.pks.candidate.model.Status;
 import com.candidate.pks.candidate.service.CandidateService;
 import com.candidate.pks.repeat.Response;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,11 +14,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/protected/candidate/")
@@ -72,4 +75,32 @@ public class CandidateController {
         Response response = candidateService.updateStatus(updateCandidateRequest);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/fetchAllCandidates")
+    @Operation(
+            summary = "Fetch All Candidates",
+            description = "This endpoint allows you to fetch a list of candidates based on filters such as schedule, status, and pagination."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Candidates successfully fetched.",
+                    content = @Content(schema = @Schema(implementation = CandidateResponseList.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input. Please verify the filter criteria and try again."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized. You do not have permission to perform this action."),
+            @ApiResponse(responseCode = "500", description = "Internal server error. An unexpected error occurred while processing the request.")
+    })
+    public ResponseEntity<CandidateResponseList> fetchAllCandidates(
+            @RequestParam(value = "fromDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
+            @RequestParam(value = "status", required = false) Status status,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "50") int size
+    ) {
+        FetchCandidatesRequest request = new FetchCandidatesRequest();
+        request.setFromDate(fromDate);
+        request.setStatus(status);
+
+        CandidateResponseList response = candidateService.fetchAllCandidates(request, page, size);
+        return ResponseEntity.ok(response);
+    }
+
+
 }

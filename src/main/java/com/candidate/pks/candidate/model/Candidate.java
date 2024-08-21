@@ -55,7 +55,7 @@ public class Candidate {
     @ManyToOne
     @JoinColumn(name = "referral_employee_id")
     private Employee referralEmployee;
-
+    private boolean isReferralAccept;
 
     private int dsaRating;
     private int reactRating;

@@ -15,7 +15,7 @@ public class EmployeeResponseDTO {
     private String name;
     private String designation;
     private String email;
-    private LocalDate joiningDate;
+    private String joiningDate;
 
 }
 

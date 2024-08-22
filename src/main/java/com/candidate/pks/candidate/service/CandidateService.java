@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -109,7 +111,7 @@ public class CandidateService {
     }
 
     public CandidateResponseList fetchAllCandidates(FetchCandidatesRequest request, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("applicationDate")));
 
         LocalDate fromDate = request.getFromDate();
         LocalDate toDate = LocalDate.now();
@@ -125,6 +127,7 @@ public class CandidateService {
         } else {
             candidatePage = candidateRepository.findAll(pageable);
         }
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
         List<CandidateResponseDTO> candidates = candidatePage.getContent().stream()
@@ -137,11 +140,14 @@ public class CandidateService {
                         referralEmployeeInfo = empId + " " + firstName + " " + lastName;
                     }
 
+                    // Convert java.util.Date to LocalDateTime
                     LocalDateTime applicationDateTime = candidate.getApplicationDate().toInstant()
                             .atZone(ZoneId.systemDefault())
                             .toLocalDateTime();
 
+                    // Format LocalDateTime
                     String formattedApplicationDate = applicationDateTime.format(formatter);
+
                     return new CandidateResponseDTO(
                             candidate.getCandidateId(),
                             candidate.getFirstName(),
@@ -154,7 +160,7 @@ public class CandidateService {
                             formattedApplicationDate
                     );
                 })
-                .toList();
+                .collect(Collectors.toList());
 
         CandidateResponseList responseList = new CandidateResponseList();
         responseList.setCandidates(candidates);
@@ -164,5 +170,4 @@ public class CandidateService {
 
         return responseList;
     }
-
 }

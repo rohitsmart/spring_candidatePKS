@@ -6,7 +6,7 @@ import java.util.Date;
 
 @Data
 public class ScheduledInterviewRequest {
-    private Integer candidateId;
-    private Integer interviewerId;
-    private Date interviewDate;
+    private String candidateId;
+    private String interviewerId;
+    private String interviewDate;
 }

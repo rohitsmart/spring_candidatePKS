@@ -17,4 +17,5 @@ public class CandidateResponseDTO {
     private String status;
     private String candidateType;
     private String referralEmployee;
+    private String applicationDate;
 }

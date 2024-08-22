@@ -117,6 +117,7 @@ public class CandidateService {
                         String lastName = candidate.getReferralEmployee().getLastName();
                         referralEmployeeInfo = empId + " " + firstName + " " + lastName;
                     }
+                    String formattedApplicationDate = candidate.getApplicationDate().toString();
 
                     return new CandidateResponseDTO(
                             candidate.getCandidateId(),
@@ -126,7 +127,8 @@ public class CandidateService {
                             candidate.getPhone(),
                             candidate.getStatus().name(),
                             candidate.getCandidateType(),
-                            referralEmployeeInfo
+                            referralEmployeeInfo,
+                            formattedApplicationDate
                     );
                 })
                 .toList();

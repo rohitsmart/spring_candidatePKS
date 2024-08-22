@@ -89,7 +89,7 @@ public class CandidateController {
             @ApiResponse(responseCode = "500", description = "Internal server error. An unexpected error occurred while processing the request.")
     })
     public ResponseEntity<CandidateResponseList> fetchAllCandidates(
-            @RequestParam(value = "fromDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
+            @RequestParam(value = "fromDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate fromDate,
             @RequestParam(value = "status", required = false) Status status,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "50") int size
@@ -101,6 +101,7 @@ public class CandidateController {
         CandidateResponseList response = candidateService.fetchAllCandidates(request, page, size);
         return ResponseEntity.ok(response);
     }
+
 
 
 }

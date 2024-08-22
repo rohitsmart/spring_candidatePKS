@@ -90,63 +90,12 @@ public class CandidateService {
                 .message("Candidate status updated")
                 .build();
     }
-
-//    public CandidateResponseList fetchAllCandidates(FetchCandidatesRequest request, int page, int size) {
-//        Pageable pageable = PageRequest.of(page, size);
-//
-//        LocalDate fromDate = request.getFromDate();
-//        Status status = request.getStatus();
-//
-//        Page<Candidate> candidatePage;
-//        if (fromDate != null && status != null) {
-//            candidatePage = candidateRepository.findByApplicationDateAfterAndStatus(fromDate, status, pageable);
-//        } else if (fromDate != null) {
-//            candidatePage = candidateRepository.findByApplicationDateAfter(fromDate, pageable);
-//        } else if (status != null) {
-//            candidatePage = candidateRepository.findByStatus(status, pageable);
-//        } else {
-//            candidatePage = candidateRepository.findAll(pageable);
-//        }
-//
-//        List<CandidateResponseDTO> candidates = candidatePage.getContent().stream()
-//                .map(candidate -> {
-//                    String referralEmployeeInfo = null;
-//                    if (candidate.getReferralEmployee() != null) {
-//                        String empId = candidate.getReferralEmployee().getEmpId();
-//                        String firstName = candidate.getReferralEmployee().getFirstName();
-//                        String lastName = candidate.getReferralEmployee().getLastName();
-//                        referralEmployeeInfo = empId + " " + firstName + " " + lastName;
-//                    }
-//                    String formattedApplicationDate = candidate.getApplicationDate().toString();
-//
-//                    return new CandidateResponseDTO(
-//                            candidate.getCandidateId(),
-//                            candidate.getFirstName(),
-//                            candidate.getLastName(),
-//                            candidate.getEmail(),
-//                            candidate.getPhone(),
-//                            candidate.getStatus().name(),
-//                            candidate.getCandidateType(),
-//                            referralEmployeeInfo,
-//                            formattedApplicationDate
-//                    );
-//                })
-//                .toList();
-//
-//        CandidateResponseList responseList = new CandidateResponseList();
-//        responseList.setCandidates(candidates);
-//        responseList.setTotalCandidates(candidatePage.getTotalElements());
-//        responseList.setTotalPages(candidatePage.getTotalPages());
-//        responseList.setCurrentPage(candidatePage.getNumber());
-//
-//        return responseList;
-//    }
-
+    
     public CandidateResponseList fetchAllCandidates(FetchCandidatesRequest request, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         LocalDate fromDate = request.getFromDate();
-        LocalDate toDate = LocalDate.now(); // Current date as the end date
+        LocalDate toDate = LocalDate.now();
         Status status = request.getStatus();
 
         Page<Candidate> candidatePage;
@@ -170,7 +119,6 @@ public class CandidateService {
                         referralEmployeeInfo = empId + " " + firstName + " " + lastName;
                     }
 
-                    // Format the application date as needed, for example: "yyyy-MM-dd HH:mm:ss.SSS"
                     String formattedApplicationDate = candidate.getApplicationDate().toString();
 
                     return new CandidateResponseDTO(

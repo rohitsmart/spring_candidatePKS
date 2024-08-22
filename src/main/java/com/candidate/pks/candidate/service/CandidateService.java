@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -123,6 +125,7 @@ public class CandidateService {
         } else {
             candidatePage = candidateRepository.findAll(pageable);
         }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
         List<CandidateResponseDTO> candidates = candidatePage.getContent().stream()
                 .map(candidate -> {
@@ -134,8 +137,11 @@ public class CandidateService {
                         referralEmployeeInfo = empId + " " + firstName + " " + lastName;
                     }
 
-                    String formattedApplicationDate = candidate.getApplicationDate().toString();
+                    LocalDateTime applicationDateTime = candidate.getApplicationDate().toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime();
 
+                    String formattedApplicationDate = applicationDateTime.format(formatter);
                     return new CandidateResponseDTO(
                             candidate.getCandidateId(),
                             candidate.getFirstName(),

@@ -9,7 +9,9 @@ import com.candidate.pks.auth.repository.EmployeeRepository;
 import com.candidate.pks.exception.BadDateAndTimeFormatException;
 import com.candidate.pks.exception.CandidateNotFoundException;
 import com.candidate.pks.repeat.Response;
+import com.candidate.pks.service.MailService;
 import com.candidate.pks.util.CandidateIdGenerator;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -32,6 +35,8 @@ public class CandidateService {
     private final EmployeeRepository employeeRepository;
     @Autowired
     private final CandidateIdGenerator candidateIdGenerator;
+    private final MailService mailService;
+
 
     public Response addCandidate(AddCandidateRequest addCandidateRequest) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -72,10 +77,20 @@ public class CandidateService {
                 .masterDegree(addCandidateRequest.getMasterDegree())
                 .district(addCandidateRequest.getDistrict())
                 .state(addCandidateRequest.getState())
-                .dob(dob) // Use the parsed LocalDate here
+                .dob(dob)
                 .build();
 
         candidateRepository.save(candidate);
+        try {
+            mailService.sendWelcomeEmail(
+                    candidate.getEmail(),
+                    candidate.getFirstName(),
+                    candidate.getLastName()
+            );
+        } catch (MessagingException | IOException e) {
+            log.error("Failed to send welcome email to candidate: {}", candidate.getEmail(), e);
+            throw new RuntimeException("Failed to send welcome email to candidate.");
+        }
 
         return new Response("Candidate added successfully.");
     }
@@ -90,7 +105,7 @@ public class CandidateService {
                 .message("Candidate status updated")
                 .build();
     }
-    
+
     public CandidateResponseList fetchAllCandidates(FetchCandidatesRequest request, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 

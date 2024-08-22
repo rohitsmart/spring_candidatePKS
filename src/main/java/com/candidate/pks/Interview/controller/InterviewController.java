@@ -37,7 +37,7 @@ public class InterviewController {
             @ApiResponse(responseCode = "500", description = "Internal server error. An unexpected error occurred while processing the request.")
     })
     public ResponseEntity<Response> createScheduled(@RequestBody ScheduledInterviewRequest scheduledInterviewRequest) {
-        Response response = interviewService.createScheduled(scheduledInterviewRequest);
+        Response response = interviewService.createOrUpdateScheduled(scheduledInterviewRequest);
         return ResponseEntity.ok(response);
     }
 

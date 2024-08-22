@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +33,7 @@ public class InterviewService {
     private final EmployeeRepository employeeRepository;
     private final InterviewRepository interviewRepository;
     private final MailService mailService;
-    public Response createScheduled(ScheduledInterviewRequest scheduledInterviewRequest) {
+    public Response createOrUpdateScheduled(ScheduledInterviewRequest scheduledInterviewRequest) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         Date interviewDate;
         try {
@@ -40,23 +41,48 @@ public class InterviewService {
         } catch (ParseException e) {
             throw new IllegalArgumentException("Invalid date format. Please use DD/MM/YYYY HH:MM.");
         }
+
         Candidate candidate = candidateRepository.findByCandidateId(scheduledInterviewRequest.getCandidateId())
                 .orElseThrow(() -> new CandidateNotFoundException("Candidate ID " + scheduledInterviewRequest.getCandidateId() + " not found"));
 
         Employee interviewer = employeeRepository.findByEmpId(scheduledInterviewRequest.getInterviewerId())
                 .orElseThrow(() -> new EmployeeNotFoundException("Employee ID " + scheduledInterviewRequest.getInterviewerId() + " not found"));
 
-        Interview interview = Interview.builder()
-                .candidate(candidate)
-                .interviewerName(interviewer)
-                .interviewDate(interviewDate)
-                .interviewStatus(InterviewStatus.SCHEDULED)
-                .build();
+        // Check if an interview already exists
+        Optional<Interview> existingInterview = interviewRepository.findByCandidateAndInterviewerName(candidate, interviewer);
 
-        interviewRepository.save(interview);
-         candidate.setStatus(Status.INTERVIEW_SCHEDULED);
-         candidateRepository.save(candidate);
+        if (existingInterview.isPresent()) {
+            // Update the existing interview
+            Interview interview = existingInterview.get();
+            interview.setInterviewDate(interviewDate);
+            interview.setInterviewStatus(InterviewStatus.SCHEDULED);
+            interviewRepository.save(interview);
 
+            // Send email notifications
+            sendNotificationEmails(candidate, interviewer, interviewDate);
+
+            return new Response("Interview updated successfully.");
+        }  else {
+            // Create a new interview
+            Interview newInterview = Interview.builder()
+                    .candidate(candidate)
+                    .interviewerName(interviewer)
+                    .interviewDate(interviewDate)
+                    .interviewStatus(InterviewStatus.SCHEDULED)
+                    .build();
+
+            interviewRepository.save(newInterview);
+            candidate.setStatus(Status.INTERVIEW_SCHEDULED);
+            candidateRepository.save(candidate);
+
+            // Send email notifications
+            sendNotificationEmails(candidate, interviewer, interviewDate);
+
+            return new Response("Interview scheduled successfully.");
+        }
+    }
+
+    private void sendNotificationEmails(Candidate candidate, Employee interviewer, Date interviewDate) {
         try {
             // Send email to candidate
             mailService.sendInterviewNotificationToCandidate(
@@ -76,7 +102,6 @@ public class InterviewService {
         } catch (MessagingException | IOException e) {
             throw new RuntimeException("Failed to send interview notification emails", e);
         }
-        return new Response("Interview scheduled successfully.");
     }
 
     public Response updateCandidate(InitialCommitRequest initialCommitRequest) {

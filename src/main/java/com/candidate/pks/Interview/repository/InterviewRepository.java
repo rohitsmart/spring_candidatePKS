@@ -2,6 +2,8 @@ package com.candidate.pks.Interview.repository;
 
 import com.candidate.pks.Interview.model.Interview;
 import com.candidate.pks.Interview.model.InterviewStatus;
+import com.candidate.pks.auth.model.Employee;
+import com.candidate.pks.candidate.model.Candidate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,4 +24,9 @@ public interface InterviewRepository extends JpaRepository<Interview, Integer> {
 
     @Override
     Optional<Interview> findById(Integer integer);
+
+    Optional<Interview> findByCandidateAndInterviewerName(Candidate candidate, Employee interviewer);
+    Optional<Interview> findByCandidate(Candidate candidate);
+
+
 }

@@ -1,5 +1,7 @@
 package com.candidate.pks.candidate.service;
 
+import com.candidate.pks.Interview.model.Interview;
+import com.candidate.pks.Interview.repository.InterviewRepository;
 import com.candidate.pks.auth.model.Designation;
 import com.candidate.pks.auth.model.User;
 import com.candidate.pks.auth.model.UserRole;
@@ -32,6 +34,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -42,6 +45,7 @@ public class CandidateService {
 
     private final CandidateRepository candidateRepository;
     private final EmployeeRepository employeeRepository;
+    private final InterviewRepository interviewRepository;
     @Autowired
     private final CandidateIdGenerator candidateIdGenerator;
     private final MailService mailService;
@@ -127,16 +131,13 @@ public class CandidateService {
 
     public CandidateResponseList fetchAllCandidates(FetchCandidatesRequest request, int page, int size, User user) {
         UserRole loginUserRole = user.getRole();
-
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("applicationDate")));
         LocalDate fromDate = request.getFromDate();
         LocalDate toDate = LocalDate.now();
         Status status = request.getStatus();
-
         Page<Candidate> candidatePage;
 
         if (loginUserRole == UserRole.ADMIN) {
-            // Admin can fetch all candidates based on request filters
             if (fromDate != null && status != null) {
                 candidatePage = candidateRepository.findByApplicationDateBetweenAndStatus(fromDate.atStartOfDay(), toDate.atTime(23, 59, 59), status, pageable);
             } else if (fromDate != null) {
@@ -147,13 +148,10 @@ public class CandidateService {
                 candidatePage = candidateRepository.findAll(pageable);
             }
         } else {
-            // For other roles, we need to retrieve the employee details
             Designation loginUserDesignation = user.getEmployee() != null ? user.getEmployee().getDesignation() : null;
             String loginUserEmpId = user.getEmployee() != null ? user.getEmployee().getEmpId() : null;
-
             if (loginUserRole == UserRole.Employee &&
                     (loginUserDesignation == Designation.HR || loginUserDesignation == Designation.MANAGER)) {
-                // HR or Manager can fetch all candidates
                 if (fromDate != null && status != null) {
                     candidatePage = candidateRepository.findByApplicationDateBetweenAndStatus(fromDate.atStartOfDay(), toDate.atTime(23, 59, 59), status, pageable);
                 } else if (fromDate != null) {
@@ -164,7 +162,6 @@ public class CandidateService {
                     candidatePage = candidateRepository.findAll(pageable);
                 }
             } else {
-                // Other employees can only see candidates whose interviews they are scheduled to take
                 candidatePage = candidateRepository.findByInterviewScheduledForEmpId(loginUserEmpId, pageable);
             }
         }
@@ -186,6 +183,23 @@ public class CandidateService {
                             .toLocalDateTime();
                     String formattedApplicationDate = applicationDateTime.format(formatter);
 
+                    // Default values for interview details
+                    String interviewDate = null;
+                    boolean isScheduled = false;
+
+                    if (candidate.getStatus() == Status.INTERVIEW_SCHEDULED) {
+                        // Fetch the interview details for the candidate
+                        Optional<Interview> interviewOpt = interviewRepository.findByCandidate(candidate);
+                        if (interviewOpt.isPresent()) {
+                            Interview interview = interviewOpt.get();
+                            LocalDateTime interviewDateTime = interview.getInterviewDate().toInstant()
+                                    .atZone(ZoneId.systemDefault())
+                                    .toLocalDateTime();
+                            interviewDate = interviewDateTime.format(formatter);
+                            isScheduled = true;
+                        }
+                    }
+
                     return new CandidateResponseDTO(
                             candidate.getCandidateId(),
                             candidate.getFirstName(),
@@ -195,11 +209,12 @@ public class CandidateService {
                             candidate.getStatus().name(),
                             candidate.getCandidateType(),
                             referralEmployeeInfo,
-                            formattedApplicationDate
+                            formattedApplicationDate,
+                            interviewDate,
+                            isScheduled
                     );
                 })
                 .collect(Collectors.toList());
-
         CandidateResponseList responseList = new CandidateResponseList();
         responseList.setCandidates(candidates);
         responseList.setTotalCandidates(candidatePage.getTotalElements());

@@ -152,12 +152,9 @@ public class CandidateService {
                         referralEmployeeInfo = empId + " " + firstName + " " + lastName;
                     }
 
-                    // Convert java.util.Date to LocalDateTime
                     LocalDateTime applicationDateTime = candidate.getApplicationDate().toInstant()
                             .atZone(ZoneId.systemDefault())
                             .toLocalDateTime();
-
-                    // Format LocalDateTime
                     String formattedApplicationDate = applicationDateTime.format(formatter);
 
                     return new CandidateResponseDTO(
@@ -183,6 +180,7 @@ public class CandidateService {
         return responseList;
     }
 
+
     public void generateDummyCandidates(int count) {
         for (int i = 0; i < count; i++) {
             AddCandidateRequest request = new AddCandidateRequest();
@@ -206,4 +204,5 @@ public class CandidateService {
             addCandidate(request);
         }
     }
+
 }

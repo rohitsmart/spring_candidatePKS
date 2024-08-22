@@ -102,6 +102,8 @@ public class CandidateController {
         return ResponseEntity.ok(response);
     }
 
+
+
     @PostMapping("/generate-dummy-candidate")
     @Operation(
             summary = "Generate Dummy Candidates",

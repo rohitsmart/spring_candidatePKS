@@ -27,7 +27,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +42,16 @@ public class CandidateService {
     @Autowired
     private final CandidateIdGenerator candidateIdGenerator;
     private final MailService mailService;
+
+    private static final String[] FIRST_NAMES = {"John", "Jane", "Michael", "Emily", "Robert", "Linda", "David", "Sarah", "James", "Jessica"};
+    private static final String[] LAST_NAMES = {"Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor"};
+    private static final String[] DEGREE = {"Computer Science", "Mechanical Engineering", "Electrical Engineering", "Business Administration", "Finance"};
+    private static final String[] CV_URLS = {"http://example.com/cv/johndoe", "http://example.com/cv/janedoe", "http://example.com/cv/michaelbrown"};
+    private static final String[] CANDIDATE_TYPES = {"front-end", "back-end", "fullstack"};
+    private static final String[] DISTRICTS = {"Central", "East", "West", "North", "South"};
+    private static final String[] STATES = {"California", "New York", "Texas", "Florida", "Illinois"};
+
+    private static final Random RANDOM = new Random();
 
 
     public Response addCandidate(AddCandidateRequest addCandidateRequest) {
@@ -169,5 +181,29 @@ public class CandidateService {
         responseList.setCurrentPage(candidatePage.getNumber());
 
         return responseList;
+    }
+
+    public void generateDummyCandidates(int count) {
+        for (int i = 0; i < count; i++) {
+            AddCandidateRequest request = new AddCandidateRequest();
+            request.setFirstName(FIRST_NAMES[RANDOM.nextInt(FIRST_NAMES.length)]);
+            request.setLastName(LAST_NAMES[RANDOM.nextInt(LAST_NAMES.length)]);
+            request.setEmail(request.getFirstName().toLowerCase() + "." + request.getLastName().toLowerCase() + "@example.com");
+            request.setPhone("12345678" + RANDOM.nextInt(10));
+            request.setStatus(Status.APPLICATION_RECEIVED);  // Or any other status as required
+            request.setHighSchoolPassOut("200" + (RANDOM.nextInt(10) + 1));
+            request.setIntermediatePassOut("201" + (RANDOM.nextInt(10) + 1));
+            request.setBachelorDegree(DEGREE[RANDOM.nextInt(DEGREE.length)]);
+            request.setBachelorPassOut("201" + (RANDOM.nextInt(10) + 1));
+            request.setMasterDegree(DEGREE[RANDOM.nextInt(DEGREE.length)]);
+            request.setMasterPassOut("201" + (RANDOM.nextInt(10) + 1));
+            request.setCvUrl(CV_URLS[RANDOM.nextInt(CV_URLS.length)]);
+            request.setCandidateType(CANDIDATE_TYPES[RANDOM.nextInt(CANDIDATE_TYPES.length)]);
+            request.setDob("15/08/" + (RANDOM.nextInt(30) + 1970));
+            request.setDistrict(DISTRICTS[RANDOM.nextInt(DISTRICTS.length)]);
+            request.setState(STATES[RANDOM.nextInt(STATES.length)]);
+            request.setAddress("123 Sample Address " + (RANDOM.nextInt(100) + 1));
+            addCandidate(request);
+        }
     }
 }

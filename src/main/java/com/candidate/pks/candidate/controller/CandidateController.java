@@ -102,6 +102,23 @@ public class CandidateController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/generate-dummy-candidate")
+    @Operation(
+            summary = "Generate Dummy Candidates",
+            description = "This endpoint generates a specified number of dummy candidates and adds them to the system."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Dummy candidates successfully generated.",
+                    content = @Content(schema = @Schema(implementation = CandidateResponseList.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input. Please check the request parameters."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized. You do not have permission to perform this action."),
+            @ApiResponse(responseCode = "500", description = "Internal server error. An unexpected error occurred.")
+    })
+    public void fetchAllCandidates(
+    ) {
+        candidateService.generateDummyCandidates(10);
+    }
+
 
 
 }

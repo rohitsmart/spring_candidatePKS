@@ -145,7 +145,7 @@ public class EmployeeService {
         candidate.setFlutterRating(candidateRequest.getFlutterRating());
         candidate.setReactNativeRating(candidateRequest.getReactNativeRating());
         candidate.setMachineLearning(candidateRequest.getMachineLearning());
-        candidate.setStatus(Status.INTERVIEWED);
+        candidate.setStatus(Status.INTERVIEW_COMPLETED);
 
         candidateRepository.save(candidate);
         interviewRepository.save(interview);

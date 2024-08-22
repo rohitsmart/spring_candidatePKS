@@ -89,7 +89,7 @@ public class Candidate {
     @PrePersist
     protected void onCreate() {
         applicationDate = new Date();
-        status= Status.APPLIED;
+        status= Status.APPLICATION_RECEIVED;
     }
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     private LocalDate dob;

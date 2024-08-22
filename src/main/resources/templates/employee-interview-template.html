@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Interview Scheduled - PerfectKode</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f9fc;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            max-width: 200px;
+        }
+        .content {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333333;
+        }
+        .content h1 {
+            font-size: 24px;
+            color: #2c3e50;
+        }
+        .content p {
+            margin: 15px 0;
+        }
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #777777;
+            margin-top: 30px;
+        }
+        .footer p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <img src="https://perfectkode.com/static/media/logo.ed7cf56626446ad06ce0.png" alt="PerfectKode Logo"/>
+    </div>
+    <div class="content">
+        <h1>Interview Scheduled - PerfectKode</h1>
+        <p>Dear <span th:text="${firstName}"></span>,</p>
+        <p>Your interview with <span th:text="${candidateName}"></span> has been scheduled.</p>
+        <p><strong>Interview Date and Time:</strong> <span th:text="${interviewDate}"></span></p>
+        <p><strong>Candidate:</strong> <span th:text="${candidateName}"></span></p>
+        <p>Please make sure to prepare accordingly. If you have any questions or need to reschedule, contact us at <a href="mailto:hr@perfectkode.com">hr@perfectkode.com</a>.</p>
+        <p>Thank you for your time and cooperation!</p>
+    </div>
+    <div class="footer">
+        <p>Best regards,<br/>The PerfectKode Team</p>
+    </div>
+</div>
+</body>
+</html>

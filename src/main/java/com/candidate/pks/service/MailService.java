@@ -80,4 +80,47 @@ public class MailService {
         log.info("Welcome email sent to: {}", to);
     }
 
+    public void sendInterviewNotificationToCandidate(String to, String firstName, String interviewDate, String interviewerName) throws MessagingException, IOException {
+        log.info("Preparing to send interview notification to candidate: {}", to);
+
+        Context context = new Context();
+        context.setVariable("firstName", firstName);
+        context.setVariable("interviewDate", interviewDate);
+        context.setVariable("interviewerName", interviewerName);
+
+        String emailContent = templateEngine.process("candidate-interview-template", context);
+        log.debug("Email content prepared: {}", emailContent);
+
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+        helper.setTo(to);
+        helper.setSubject("Interview Scheduled - PerfectKode");
+        helper.setText(emailContent, true);
+
+        javaMailSender.send(message);
+        log.info("Interview notification sent to candidate: {}", to);
+    }
+
+    public void sendInterviewNotificationToEmployee(String to, String firstName, String interviewDate, String candidateName) throws MessagingException, IOException {
+        log.info("Preparing to send interview notification to employee: {}", to);
+
+        Context context = new Context();
+        context.setVariable("firstName", firstName);
+        context.setVariable("interviewDate", interviewDate);
+        context.setVariable("candidateName", candidateName);
+
+        String emailContent = templateEngine.process("employee-interview-template", context);
+        log.debug("Email content prepared: {}", emailContent);
+
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+        helper.setTo(to);
+        helper.setSubject("Interview Scheduled - PerfectKode");
+        helper.setText(emailContent, true);
+
+        javaMailSender.send(message);
+        log.info("Interview notification sent to employee: {}", to);
+    }
+
+
 }

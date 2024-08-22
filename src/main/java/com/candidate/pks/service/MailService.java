@@ -122,5 +122,26 @@ public class MailService {
         log.info("Interview notification sent to employee: {}", to);
     }
 
+    public void sendOtpToEmployee(String to, String firstName, String lastName, String otp) throws MessagingException, IOException {
+        log.info("Preparing to send OTP to employee: {}", to);
+
+        Context context = new Context();
+        context.setVariable("firstName", firstName);
+        context.setVariable("lastName", lastName);
+        context.setVariable("otp", otp);
+
+        String emailContent = templateEngine.process("otp-email-template", context);
+        log.debug("Email content prepared: {}", emailContent);
+
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+        helper.setTo(to);
+        helper.setSubject("Your OTP Code - PerfectKode");
+        helper.setText(emailContent, true);
+
+        javaMailSender.send(message);
+        log.info("OTP sent to employee: {}", to);
+    }
+
 
 }

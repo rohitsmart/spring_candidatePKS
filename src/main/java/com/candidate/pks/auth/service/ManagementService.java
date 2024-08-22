@@ -86,7 +86,6 @@ public class ManagementService {
         }
     }
 
-
     public Page<EmployeeResponseDTO> getEmployees(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Employee> employeePage = employeeRepository.findAll(pageable);

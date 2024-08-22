@@ -1,5 +1,6 @@
 package com.candidate.pks.candidate.controller;
 
+import com.candidate.pks.auth.model.User;
 import com.candidate.pks.candidate.dto.AddCandidateRequest;
 import com.candidate.pks.candidate.dto.CandidateResponseList;
 import com.candidate.pks.candidate.dto.FetchCandidatesRequest;
@@ -7,11 +8,13 @@ import com.candidate.pks.candidate.dto.UpdateCandidateRequest;
 import com.candidate.pks.candidate.model.Status;
 import com.candidate.pks.candidate.service.CandidateService;
 import com.candidate.pks.repeat.Response;
+import com.candidate.pks.security.UserDetail;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -24,9 +27,11 @@ import java.time.LocalDate;
 @RequestMapping("/api/protected/candidate/")
 @RequiredArgsConstructor
 @Tag(name = "Candidate Management", description = "Endpoints for managing candidates, including adding and updating candidate information.")
+@SecurityRequirement(name = "bearerAuth")
 public class CandidateController {
 
     private final CandidateService candidateService;
+    private final UserDetail userDetail;
 
     @PostMapping("save")
     @Operation(
@@ -94,11 +99,12 @@ public class CandidateController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "50") int size
     ) {
+        User user = userDetail.getUser();
         FetchCandidatesRequest request = new FetchCandidatesRequest();
         request.setFromDate(fromDate);
         request.setStatus(status);
 
-        CandidateResponseList response = candidateService.fetchAllCandidates(request, page, size);
+        CandidateResponseList response = candidateService.fetchAllCandidates(request, page, size,user);
         return ResponseEntity.ok(response);
     }
 

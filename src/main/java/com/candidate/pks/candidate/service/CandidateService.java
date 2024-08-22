@@ -1,5 +1,8 @@
 package com.candidate.pks.candidate.service;
 
+import com.candidate.pks.auth.model.Designation;
+import com.candidate.pks.auth.model.User;
+import com.candidate.pks.auth.model.UserRole;
 import com.candidate.pks.candidate.dto.*;
 import com.candidate.pks.candidate.model.Candidate;
 import com.candidate.pks.candidate.model.Status;
@@ -122,22 +125,48 @@ public class CandidateService {
                 .build();
     }
 
-    public CandidateResponseList fetchAllCandidates(FetchCandidatesRequest request, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("applicationDate")));
+    public CandidateResponseList fetchAllCandidates(FetchCandidatesRequest request, int page, int size, User user) {
+        UserRole loginUserRole = user.getRole();
 
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("applicationDate")));
         LocalDate fromDate = request.getFromDate();
         LocalDate toDate = LocalDate.now();
         Status status = request.getStatus();
 
         Page<Candidate> candidatePage;
-        if (fromDate != null && status != null) {
-            candidatePage = candidateRepository.findByApplicationDateBetweenAndStatus(fromDate.atStartOfDay(), toDate.atTime(23, 59, 59), status, pageable);
-        } else if (fromDate != null) {
-            candidatePage = candidateRepository.findByApplicationDateBetween(fromDate.atStartOfDay(), toDate.atTime(23, 59, 59), pageable);
-        } else if (status != null) {
-            candidatePage = candidateRepository.findByStatus(status, pageable);
+
+        if (loginUserRole == UserRole.ADMIN) {
+            // Admin can fetch all candidates based on request filters
+            if (fromDate != null && status != null) {
+                candidatePage = candidateRepository.findByApplicationDateBetweenAndStatus(fromDate.atStartOfDay(), toDate.atTime(23, 59, 59), status, pageable);
+            } else if (fromDate != null) {
+                candidatePage = candidateRepository.findByApplicationDateBetween(fromDate.atStartOfDay(), toDate.atTime(23, 59, 59), pageable);
+            } else if (status != null) {
+                candidatePage = candidateRepository.findByStatus(status, pageable);
+            } else {
+                candidatePage = candidateRepository.findAll(pageable);
+            }
         } else {
-            candidatePage = candidateRepository.findAll(pageable);
+            // For other roles, we need to retrieve the employee details
+            Designation loginUserDesignation = user.getEmployee() != null ? user.getEmployee().getDesignation() : null;
+            String loginUserEmpId = user.getEmployee() != null ? user.getEmployee().getEmpId() : null;
+
+            if (loginUserRole == UserRole.Employee &&
+                    (loginUserDesignation == Designation.HR || loginUserDesignation == Designation.MANAGER)) {
+                // HR or Manager can fetch all candidates
+                if (fromDate != null && status != null) {
+                    candidatePage = candidateRepository.findByApplicationDateBetweenAndStatus(fromDate.atStartOfDay(), toDate.atTime(23, 59, 59), status, pageable);
+                } else if (fromDate != null) {
+                    candidatePage = candidateRepository.findByApplicationDateBetween(fromDate.atStartOfDay(), toDate.atTime(23, 59, 59), pageable);
+                } else if (status != null) {
+                    candidatePage = candidateRepository.findByStatus(status, pageable);
+                } else {
+                    candidatePage = candidateRepository.findAll(pageable);
+                }
+            } else {
+                // Other employees can only see candidates whose interviews they are scheduled to take
+                candidatePage = candidateRepository.findByInterviewScheduledForEmpId(loginUserEmpId, pageable);
+            }
         }
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");

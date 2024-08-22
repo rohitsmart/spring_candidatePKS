@@ -34,7 +34,7 @@ public class Employee {
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     private LocalDate joiningDate;
 
-
     @OneToOne(mappedBy = "employee")
     private User user;
+
 }

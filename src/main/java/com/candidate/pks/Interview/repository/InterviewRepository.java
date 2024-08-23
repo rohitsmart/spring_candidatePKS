@@ -32,6 +32,19 @@ public interface InterviewRepository extends JpaRepository<Interview, Integer> {
     Optional<Interview> findByCandidate(Candidate candidate);
 
 
+//    @Query("SELECT i FROM Interview i WHERE i.interviewDate >= ?1 AND i.interviewStatus = ?2")
+//    Page<Interview> findByInterviewDateAndStatus(Date fromDate, InterviewStatus interviewStatus, Pageable pageable);
+//
+//    @Query("SELECT i FROM Interview i WHERE i.interviewDate >= ?1")
+//    Page<Interview> findByInterviewDate(Date fromDate, Pageable pageable);
+//
+//    @Query("SELECT i FROM Interview i WHERE i.interviewStatus = ?1")
+//    Page<Interview> findByInterviewStatus(InterviewStatus interviewStatus, Pageable pageable);
+//
+//    @Override
+//    Page<Interview> findAll(Pageable pageable);
+//
+//
     @Query("SELECT i FROM Interview i WHERE i.interviewDate >= ?1 AND i.interviewStatus = ?2")
     Page<Interview> findByInterviewDateAndStatus(Date fromDate, InterviewStatus interviewStatus, Pageable pageable);
 
@@ -40,6 +53,18 @@ public interface InterviewRepository extends JpaRepository<Interview, Integer> {
 
     @Query("SELECT i FROM Interview i WHERE i.interviewStatus = ?1")
     Page<Interview> findByInterviewStatus(InterviewStatus interviewStatus, Pageable pageable);
+
+    @Query("SELECT i FROM Interview i WHERE i.interviewerName.id = ?1 AND i.interviewDate >= ?2 AND i.interviewStatus = ?3")
+    Page<Interview> findByInterviewerIdAndInterviewDateAndStatus(Integer interviewerId, Date fromDate, InterviewStatus interviewStatus, Pageable pageable);
+
+    @Query("SELECT i FROM Interview i WHERE i.interviewerName.id = ?1 AND i.interviewDate >= ?2")
+    Page<Interview> findByInterviewerIdAndInterviewDate(Integer interviewerId, Date fromDate, Pageable pageable);
+
+    @Query("SELECT i FROM Interview i WHERE i.interviewerName.id = ?1 AND i.interviewStatus = ?2")
+    Page<Interview> findByInterviewerIdAndInterviewStatus(Integer interviewerId, InterviewStatus interviewStatus, Pageable pageable);
+
+    @Query("SELECT i FROM Interview i WHERE i.interviewerName.id = ?1")
+    Page<Interview> findByInterviewerId(Integer interviewerId, Pageable pageable);
 
     @Override
     Page<Interview> findAll(Pageable pageable);

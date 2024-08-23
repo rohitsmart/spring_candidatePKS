@@ -4,7 +4,9 @@ import com.candidate.pks.Interview.dto.*;
 import com.candidate.pks.Interview.model.Interview;
 import com.candidate.pks.Interview.model.InterviewStatus;
 import com.candidate.pks.Interview.repository.InterviewRepository;
+import com.candidate.pks.auth.model.Designation;
 import com.candidate.pks.auth.model.User;
+import com.candidate.pks.auth.model.UserRole;
 import com.candidate.pks.candidate.model.Candidate;
 import com.candidate.pks.candidate.model.Status;
 import com.candidate.pks.candidate.repository.CandidateRepository;
@@ -145,16 +147,39 @@ public class InterviewService {
         if (request.getFromDate() != null) {
             fromDate = Date.from(request.getFromDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
+
         Page<Interview> interviewPage;
-        if (fromDate != null && request.getInterviewStatus() != null) {
-            interviewPage = interviewRepository.findByInterviewDateAndStatus(fromDate, request.getInterviewStatus(), pageable);
-        } else if (fromDate != null) {
-            interviewPage = interviewRepository.findByInterviewDate(fromDate, pageable);
-        } else if (request.getInterviewStatus() != null) {
-            interviewPage = interviewRepository.findByInterviewStatus(request.getInterviewStatus(), pageable);
+
+        // Check user role and designation
+        if (user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.Hr ||
+                (user.getEmployee() != null && user.getEmployee().getDesignation() == Designation.MANAGER)) {
+            // Admin, HR, or Manager can see all interviews
+            if (fromDate != null && request.getInterviewStatus() != null) {
+                interviewPage = interviewRepository.findByInterviewDateAndStatus(fromDate, request.getInterviewStatus(), pageable);
+            } else if (fromDate != null) {
+                interviewPage = interviewRepository.findByInterviewDate(fromDate, pageable);
+            } else if (request.getInterviewStatus() != null) {
+                interviewPage = interviewRepository.findByInterviewStatus(request.getInterviewStatus(), pageable);
+            } else {
+                interviewPage = interviewRepository.findAll(pageable);
+            }
         } else {
-            interviewPage = interviewRepository.findAll(pageable);
+            // Other users can only see their own interviews
+            if (fromDate != null && request.getInterviewStatus() != null) {
+                assert user.getEmployee() != null;
+                interviewPage = interviewRepository.findByInterviewerIdAndInterviewDateAndStatus(user.getEmployee().getId(), fromDate, request.getInterviewStatus(), pageable);
+            } else if (fromDate != null) {
+                assert user.getEmployee() != null;
+                interviewPage = interviewRepository.findByInterviewerIdAndInterviewDate(user.getEmployee().getId(), fromDate, pageable);
+            } else if (request.getInterviewStatus() != null) {
+                assert user.getEmployee() != null;
+                interviewPage = interviewRepository.findByInterviewerIdAndInterviewStatus(user.getEmployee().getId(), request.getInterviewStatus(), pageable);
+            } else {
+                assert user.getEmployee() != null;
+                interviewPage = interviewRepository.findByInterviewerId(user.getEmployee().getId(), pageable);
+            }
         }
+
         List<ScheduleResponseDTO> scheduleResponseDTOs = interviewPage.getContent().stream().map(interview -> {
             ScheduleResponseDTO dto = new ScheduleResponseDTO();
             dto.setInterviewId(interview.getId());

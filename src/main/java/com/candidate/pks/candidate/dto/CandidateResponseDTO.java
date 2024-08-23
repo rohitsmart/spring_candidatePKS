@@ -16,7 +16,7 @@ public class CandidateResponseDTO {
     private String phone;
     private String status;
     private String candidateType;
-    private String referralEmployee;
+    private String interviewerName;
     private String applicationDate;
     private String interviewDate;
     private boolean isScheduled;

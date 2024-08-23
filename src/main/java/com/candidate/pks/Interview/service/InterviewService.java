@@ -17,6 +17,7 @@ import com.candidate.pks.exception.EmployeeNotFoundException;
 import com.candidate.pks.repeat.Response;
 import com.candidate.pks.service.MailService;
 import jakarta.mail.MessagingException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -150,7 +151,6 @@ public class InterviewService {
 
         Page<Interview> interviewPage;
 
-        // Check user role and designation
         if (user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.Hr ||
                 (user.getEmployee() != null && user.getEmployee().getDesignation() == Designation.MANAGER)) {
             // Admin, HR, or Manager can see all interviews
@@ -164,7 +164,6 @@ public class InterviewService {
                 interviewPage = interviewRepository.findAll(pageable);
             }
         } else {
-            // Other users can only see their own interviews
             if (fromDate != null && request.getInterviewStatus() != null) {
                 assert user.getEmployee() != null;
                 interviewPage = interviewRepository.findByInterviewerIdAndInterviewDateAndStatus(user.getEmployee().getId(), fromDate, request.getInterviewStatus(), pageable);
@@ -203,5 +202,94 @@ public class InterviewService {
         responseList.setScheduleResponseDTO(scheduleResponseDTOs);
 
         return responseList;
+    }
+
+    public InterviewResponseDTO fetchInterviewForCandidate(String candidateId, User user) {
+        Interview interview = interviewRepository.findByCandidate_CandidateId(candidateId)
+                .orElseThrow(() -> new RuntimeException("Interview does not exist for this candidate"));
+
+        Candidate candidate = interview.getCandidate();
+        Employee interviewer = interview.getInterviewerName();
+
+        InterviewResponseDTO responseDTO = new InterviewResponseDTO();
+        responseDTO.setCandidateId(candidate.getCandidateId());
+        responseDTO.setFirstName(candidate.getFirstName());
+        responseDTO.setLastName(candidate.getLastName());
+        responseDTO.setEmail(candidate.getEmail());
+        responseDTO.setPhone(candidate.getPhone());
+        responseDTO.setHighSchoolPassOut(candidate.getHighSchoolPassOut());
+        responseDTO.setIntermediatePassOut(candidate.getIntermediatePassOut());
+        responseDTO.setBachelorDegree(candidate.getBachelorDegree());
+        responseDTO.setBachelorPassOut(candidate.getBachelorPassOut());
+        responseDTO.setMasterDegree(candidate.getMasterDegree());
+        responseDTO.setMasterPassOut(candidate.getMasterPassOut());
+        responseDTO.setCandidateType(candidate.getCandidateType());
+        responseDTO.setCommunication(candidate.getCommunication());
+        responseDTO.setDressingSense(candidate.getDressingSense());
+        responseDTO.setOverAll(candidate.getOverAll());
+        responseDTO.setDistrict(candidate.getDistrict());
+        responseDTO.setState(candidate.getState());
+        responseDTO.setAddress(candidate.getAddress());
+        responseDTO.setDsaRating(candidate.getDsaRating());
+        responseDTO.setReactRating(candidate.getReactRating());
+        responseDTO.setJavascriptRating(candidate.getJavascriptRating());
+        responseDTO.setOopsRating(candidate.getOopsRating());
+        responseDTO.setSqlRating(candidate.getSqlRating());
+        responseDTO.setJavaRating(candidate.getJavaRating());
+        responseDTO.setPhpRating(candidate.getPhpRating());
+        responseDTO.setPythonRating(candidate.getPythonRating());
+        responseDTO.setHtmlRating(candidate.getHtmlRating());
+        responseDTO.setCssRating(candidate.getCssRating());
+        responseDTO.setBootstrapRating(candidate.getBootstrapRating());
+        responseDTO.setMaterialUiRating(candidate.getMaterialUiRating());
+        responseDTO.setTailwindCssRating(candidate.getTailwindCssRating());
+        responseDTO.setFlutterRating(candidate.getFlutterRating());
+        responseDTO.setReactNativeRating(candidate.getReactNativeRating());
+        responseDTO.setMachineLearning(candidate.getMachineLearning());
+        responseDTO.setInterviewId(interview.getId());
+        responseDTO.setInterviewerName(interviewer.getFirstName() + " " + interviewer.getLastName());
+        responseDTO.setInterviewDate(interview.getInterviewDate());
+        responseDTO.setInterviewStatus(interview.getInterviewStatus().name());
+        responseDTO.setFeedback(interview.getFeedback());
+
+        return responseDTO;
+    }
+
+    @Transactional
+    public Response completeInterview(CompleteInterviewRequest completeInterviewRequest) {
+        try {
+            var interview = interviewRepository.findById(completeInterviewRequest.getInterviewId())
+                    .orElseThrow(() -> new RuntimeException("No record found"));
+
+            var candidate = interview.getCandidate();
+            if (candidate == null) {
+                throw new RuntimeException("No candidate associated with this interview");
+            }
+
+            candidate.setDsaRating(completeInterviewRequest.getDsaRating());
+            candidate.setReactRating(completeInterviewRequest.getReactRating());
+            candidate.setJavascriptRating(completeInterviewRequest.getJavascriptRating());
+            candidate.setOopsRating(completeInterviewRequest.getOopsRating());
+            candidate.setSqlRating(completeInterviewRequest.getSqlRating());
+            candidate.setJavaRating(completeInterviewRequest.getJavaRating());
+            candidate.setPhpRating(completeInterviewRequest.getPhpRating());
+            candidate.setPythonRating(completeInterviewRequest.getPythonRating());
+            candidate.setHtmlRating(completeInterviewRequest.getHtmlRating());
+            candidate.setCssRating(completeInterviewRequest.getCssRating());
+            candidate.setBootstrapRating(completeInterviewRequest.getBootstrapRating());
+            candidate.setMaterialUiRating(completeInterviewRequest.getMaterialUiRating());
+            candidate.setTailwindCssRating(completeInterviewRequest.getTailwindCssRating());
+            candidate.setFlutterRating(completeInterviewRequest.getFlutterRating());
+            candidate.setReactNativeRating(completeInterviewRequest.getReactNativeRating());
+            candidate.setMachineLearning(completeInterviewRequest.getMachineLearning());
+            candidate.setStatus(Status.INTERVIEW_COMPLETED);
+            interview.setInterviewStatus(completeInterviewRequest.getInterviewStatus());
+            interview.setFeedback(completeInterviewRequest.getFeedback());
+            candidateRepository.save(candidate);
+            interviewRepository.save(interview);
+            return new Response("Interview completed successfully");
+        } catch (Exception e) {
+            return new Response("Error completing interview: " + e.getMessage());
+        }
     }
 }

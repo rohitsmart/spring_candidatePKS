@@ -75,6 +75,29 @@ public class InterviewController {
         return ResponseEntity.ok(response);
     }
 
+
+
+    @GetMapping("/fetch-interview-for-candidate")
+    @Operation(
+            summary = "Fetch Scheduled Interviews for a Candidate",
+            description = "Retrieves a list of scheduled interviews for a specified candidate, allowing for filters based on schedule, status, and pagination."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Interviews successfully retrieved.",
+                    content = @Content(schema = @Schema(implementation = ScheduleResponseList.class))),
+            @ApiResponse(responseCode = "400", description = "Bad request. Invalid input or filter criteria."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized. Access is denied due to invalid credentials."),
+            @ApiResponse(responseCode = "500", description = "Internal server error. An unexpected error occurred while processing the request.")
+    })
+    public ResponseEntity<InterviewResponseDTO> fetchInterviewForCandidate(
+            @RequestParam("candidateID") String candidateId
+    ) {
+        User user = userDetail.getUser();
+        InterviewResponseDTO response = interviewService.fetchInterviewForCandidate(candidateId, user);
+        return ResponseEntity.ok(response);
+    }
+
+
     @PostMapping("transfer-interviewer")
     @Operation(
             summary = "Transfer Interviewer",
@@ -113,6 +136,23 @@ public class InterviewController {
     })
     public ResponseEntity<Response> updateCandidate(@RequestBody InitialCommitRequest initialCommitRequest) {
         Response response = interviewService.updateCandidate(initialCommitRequest);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("complete-interview")
+    @Operation(
+            summary = "Submit Initial Interview Feedback",
+            description = "Submit the initial feedback or commit records after conducting the first round of interviews with a candidate."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Candidate information updated successfully.",
+                    content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data. Please verify the feedback details."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized. You do not have the necessary permissions to perform this action."),
+            @ApiResponse(responseCode = "500", description = "Internal server error. An unexpected error occurred while processing the request.")
+    })
+    public ResponseEntity<Response> completeInterview(@RequestBody CompleteInterviewRequest completeInterviewRequest) {
+        Response response = interviewService.completeInterview(completeInterviewRequest);
         return ResponseEntity.ok(response);
     }
 

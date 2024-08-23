@@ -35,7 +35,5 @@ public class Interview {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private InterviewStatus interviewStatus;
-
     private String feedback;
-
 }

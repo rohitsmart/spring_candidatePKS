@@ -69,4 +69,6 @@ public interface InterviewRepository extends JpaRepository<Interview, Integer> {
     @Override
     Page<Interview> findAll(Pageable pageable);
 
+    @Query("select i from Interview i where i.candidate.candidateId = ?1")
+    Optional<Interview> findByCandidate_CandidateId(String candidateId);
 }

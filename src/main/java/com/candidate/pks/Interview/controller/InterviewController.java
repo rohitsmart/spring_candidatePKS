@@ -1,28 +1,35 @@
 package com.candidate.pks.Interview.controller;
 
-import com.candidate.pks.Interview.dto.ScheduledInterviewRequest;
-import com.candidate.pks.Interview.dto.UpdateInterviewStatusRequest;
+import com.candidate.pks.Interview.dto.*;
+import com.candidate.pks.Interview.model.InterviewStatus;
 import com.candidate.pks.Interview.service.InterviewService;
-import com.candidate.pks.auth.dto.LoginResponse;
-import com.candidate.pks.Interview.dto.InitialCommitRequest;
+import com.candidate.pks.auth.model.User;
+import com.candidate.pks.candidate.dto.CandidateResponseList;
 import com.candidate.pks.repeat.Response;
+import com.candidate.pks.security.UserDetail;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/protected/interview/")
 @RequiredArgsConstructor
 @Tag(name = "Interview Management", description = "Endpoints for managing interview scheduling, interviewer transfer, and interview status updates.")
+@SecurityRequirement(name = "bearerAuth")
 public class InterviewController {
 
     private final InterviewService interviewService;
+    private final UserDetail userDetail;
 
     @PostMapping("schedule")
     @Operation(
@@ -38,6 +45,33 @@ public class InterviewController {
     })
     public ResponseEntity<Response> createScheduled(@RequestBody ScheduledInterviewRequest scheduledInterviewRequest) {
         Response response = interviewService.createOrUpdateScheduled(scheduledInterviewRequest);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/fetchAllSchedule")
+    @Operation(
+            summary = "Fetch All Schedule",
+            description = "This endpoint allows you to fetch a list of candidates based on filters such as schedule, status, and pagination."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Candidates successfully fetched.",
+                    content = @Content(schema = @Schema(implementation = CandidateResponseList.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input. Please verify the filter criteria and try again."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized. You do not have permission to perform this action."),
+            @ApiResponse(responseCode = "500", description = "Internal server error. An unexpected error occurred while processing the request.")
+    })
+    public ResponseEntity<ScheduleResponseList> fetchAllSchedule(
+            @RequestParam(value = "fromDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate fromDate,
+            @RequestParam(value = "status", required = false) InterviewStatus interviewStatus,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "50") int size
+    ) {
+        User user = userDetail.getUser();
+        FetchScheduleRequest request = new FetchScheduleRequest();
+        request.setFromDate(fromDate);
+        request.setInterviewStatus(interviewStatus);
+
+        ScheduleResponseList response = interviewService.fetchAllSchedule(request, page, size,user);
         return ResponseEntity.ok(response);
     }
 

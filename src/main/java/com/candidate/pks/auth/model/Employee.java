@@ -27,9 +27,7 @@ public class Employee {
     @Column(nullable = false)
     private String lastName;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Designation designation;
+    private String designation;
 
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     private LocalDate joiningDate;

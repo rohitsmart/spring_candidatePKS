@@ -2,7 +2,6 @@ package com.candidate.pks.candidate.service;
 
 import com.candidate.pks.Interview.model.Interview;
 import com.candidate.pks.Interview.repository.InterviewRepository;
-import com.candidate.pks.auth.model.Designation;
 import com.candidate.pks.auth.model.User;
 import com.candidate.pks.auth.model.UserRole;
 import com.candidate.pks.candidate.dto.*;
@@ -32,7 +31,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -130,7 +128,8 @@ public class CandidateService {
     }
 
     public CandidateResponseList fetchAllCandidates(FetchCandidatesRequest request, int page, int size, User user) {
-        UserRole loginUserRole = user.getRole();
+        // Assuming we use the first role for decision-making
+        UserRole loginUserRole = user.getRoles().stream().findFirst().orElse(null);
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("applicationDate")));
         LocalDate fromDate = request.getFromDate();
         LocalDate toDate = LocalDate.now();
@@ -148,10 +147,10 @@ public class CandidateService {
                 candidatePage = candidateRepository.findAll(pageable);
             }
         } else {
-            Designation loginUserDesignation = user.getEmployee() != null ? user.getEmployee().getDesignation() : null;
+            String loginUserDesignation = user.getEmployee() != null ? user.getEmployee().getDesignation() : null;
             String loginUserEmpId = user.getEmployee() != null ? user.getEmployee().getEmpId() : null;
-            if (loginUserRole == UserRole.Employee &&
-                    (loginUserDesignation == Designation.HR || loginUserDesignation == Designation.MANAGER)) {
+            if (loginUserRole == UserRole.EMPLOYEE &&
+                    (loginUserDesignation != null && (loginUserDesignation.equalsIgnoreCase("HR") || loginUserDesignation.equalsIgnoreCase("MANAGER")))) {
                 if (fromDate != null && status != null) {
                     candidatePage = candidateRepository.findByApplicationDateBetweenAndStatus(fromDate.atStartOfDay(), toDate.atTime(23, 59, 59), status, pageable);
                 } else if (fromDate != null) {
@@ -215,6 +214,7 @@ public class CandidateService {
                     );
                 })
                 .collect(Collectors.toList());
+
         CandidateResponseList responseList = new CandidateResponseList();
         responseList.setCandidates(candidates);
         responseList.setTotalCandidates(candidatePage.getTotalElements());

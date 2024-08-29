@@ -4,7 +4,6 @@ import com.candidate.pks.Interview.dto.*;
 import com.candidate.pks.Interview.model.Interview;
 import com.candidate.pks.Interview.model.InterviewStatus;
 import com.candidate.pks.Interview.repository.InterviewRepository;
-import com.candidate.pks.auth.model.Designation;
 import com.candidate.pks.auth.model.User;
 import com.candidate.pks.auth.model.UserRole;
 import com.candidate.pks.candidate.model.Candidate;
@@ -31,6 +30,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -151,8 +151,13 @@ public class InterviewService {
 
         Page<Interview> interviewPage;
 
-        if (user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.Hr ||
-                (user.getEmployee() != null && user.getEmployee().getDesignation() == Designation.MANAGER)) {
+        // Check user roles
+        Set<UserRole> userRoles = user.getRoles();
+        boolean isAdmin = userRoles.contains(UserRole.ADMIN);
+        boolean isHR = userRoles.contains(UserRole.HR);
+        boolean isManager = user.getEmployee() != null && "MANAGER".equalsIgnoreCase(user.getEmployee().getDesignation());
+
+        if (isAdmin || isHR || isManager) {
             // Admin, HR, or Manager can see all interviews
             if (fromDate != null && request.getInterviewStatus() != null) {
                 interviewPage = interviewRepository.findByInterviewDateAndStatus(fromDate, request.getInterviewStatus(), pageable);
@@ -164,6 +169,7 @@ public class InterviewService {
                 interviewPage = interviewRepository.findAll(pageable);
             }
         } else {
+            // For other users, fetch interviews assigned to them
             if (fromDate != null && request.getInterviewStatus() != null) {
                 assert user.getEmployee() != null;
                 interviewPage = interviewRepository.findByInterviewerIdAndInterviewDateAndStatus(user.getEmployee().getId(), fromDate, request.getInterviewStatus(), pageable);

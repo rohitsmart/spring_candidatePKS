@@ -30,29 +30,7 @@ public class ManagementController {
     private final ManagementService managementService;
     private final UserDetail userDetail;
 
-    @PostMapping("save")
-    @Operation(
-            summary = "Add New Employee",
-            description = "Adds a new employee to the system. This operation requires authentication and authorization."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Employee successfully added to the system.",
-                    content = @Content(schema = @Schema(implementation = Response.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid input data. Please verify the provided employee details."),
-            @ApiResponse(responseCode = "401", description = "Unauthorized. Access is denied due to invalid credentials or insufficient permissions."),
-            @ApiResponse(responseCode = "500", description = "Internal server error. An unexpected error occurred while processing the request.")
-    })
-    public ResponseEntity<Response> addEmployee(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Details of the employee to be added, including name, position, and contact information.",
-                    required = true,
-                    content = @Content(schema = @Schema(implementation = AddEmployeeRequest.class))
-            )
-            @RequestBody AddEmployeeRequest addEmployeeRequest
-    ) {
-        Response response = managementService.addEmployee(addEmployeeRequest);
-        return ResponseEntity.ok(response);
-    }
+
 
     @GetMapping("/employees")
     @Operation(
@@ -90,12 +68,13 @@ public class ManagementController {
                 .firstName(user.getEmployee() != null ? user.getEmployee().getFirstName() : null)
                 .lastName(user.getEmployee() != null ? user.getEmployee().getLastName() : null)
                 .empId(user.getEmployee() != null ? user.getEmployee().getEmpId() : null)
-                .designation(user.getEmployee() != null ? user.getEmployee().getDesignation() : null)
-                .role(user.getRole())
+                .designation(user.getEmployee() != null ? user.getEmployee().getDesignation() : null) // Ensure this is a String
+                .role(user.getRoles().stream().findFirst().orElse(null)) // Use getRoles() method
                 .build();
 
         return ResponseEntity.ok(response);
     }
+
 
 
     @GetMapping("emp-data")

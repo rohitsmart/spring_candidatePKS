@@ -37,54 +37,6 @@ public class ManagementService {
     private final EmployeeRepository employeeRepository;
     private final MailService mailService;
 
-    public Response addEmployee(AddEmployeeRequest request) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-        try {
-            log.info("Adding employee with ID: {}", request.getEmpId());
-            LocalDate joiningDate;
-            try {
-                joiningDate = LocalDate.parse(request.getJoiningDate(), formatter);
-            } catch (DateTimeParseException e) {
-                log.error("Invalid date format for joiningDate: {}", request.getJoiningDate());
-                throw new BadDateAndTimeFormatException("Invalid date format for joiningDate. Please use dd/MM/yyyy.");
-            }
-
-            Employee employee = Employee.builder()
-                    .empId(request.getEmpId())
-                    .firstName(request.getFirstName())
-                    .lastName(request.getLastName())
-                    .designation(request.getDesignation())
-                    .joiningDate(joiningDate)
-                    .build();
-
-            String password = request.getFirstName() + "@" + request.getEmpId();
-            User user = User.builder()
-                    .username(request.getUserRequest().getEmail())
-                    .password(new User().getHashPassword(password))
-                    .role(UserRole.Employee)
-                    .active(true)
-                    .employee(employee)
-                    .build();
-
-            userRepository.save(user);
-
-            try {
-                log.info("Sending email to: {}", request.getUserRequest().getEmail());
-                mailService.sendUserPassword(request.getUserRequest().getEmail(), request.getFirstName(), request.getLastName(), request.getEmpId(), password);
-            } catch (MessagingException | IOException e) {
-                log.error("Error sending email to {}: {}", request.getUserRequest().getEmail(), e.getMessage());
-                return new Response("Employee created, but email sending failed.");
-            }
-
-            log.info("Employee and user created successfully with ID: {}", request.getEmpId());
-            return new Response("Employee and user created successfully.");
-
-        } catch (Exception e) {
-            log.error("Error adding employee: {}", e.getMessage());
-            throw new BadRequestException("Error adding employee: " + e.getMessage());
-        }
-    }
 
     public Page<EmployeeResponseDTO> getEmployees(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -93,7 +45,7 @@ public class ManagementService {
         return employeePage.map(employee -> EmployeeResponseDTO.builder()
                 .empId(employee.getId())
                 .name(employee.getFirstName() + " " + employee.getLastName())
-                .designation(employee.getDesignation().name())
+                .designation(employee.getDesignation())
                 .email(employee.getUser() != null ? employee.getUser().getUsername() : null)
                 .joiningDate(String.valueOf(employee.getJoiningDate()))
                 .build());

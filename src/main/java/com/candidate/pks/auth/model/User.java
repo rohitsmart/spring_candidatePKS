@@ -9,8 +9,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.security.SecureRandom;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Builder
@@ -38,12 +39,13 @@ public class User implements UserDetails {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
 
+    @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UserRole role = UserRole.Employee;
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role")
+    private Set<UserRole> roles;
 
-
-    @OneToOne(cascade = CascadeType.ALL,fetch =FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
@@ -54,7 +56,9 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority(role.name()));
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.name()))
+                .collect(Collectors.toSet());
     }
 
     @Override

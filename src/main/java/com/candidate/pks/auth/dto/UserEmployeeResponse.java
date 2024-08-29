@@ -1,6 +1,5 @@
 package com.candidate.pks.auth.dto;
 
-import com.candidate.pks.auth.model.Designation;
 import com.candidate.pks.auth.model.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +15,6 @@ public class UserEmployeeResponse {
     private String firstName;
     private String lastName;
     private String empId;
-    private Designation designation;
+    private String designation;
     private UserRole role;
 }
